@@ -54,6 +54,7 @@ Phase 1 只使用极简技术栈：TypeScript + Playwright + dotenv + pino。
 - TypeScript 严格模式，禁止使用 `any`
 
 **关键文档：**
+- Agent 导航入口（先读这个）：`AGENTS.md`
 - 架构决策：`docs/ARCHITECTURE.md`
 - Phase 1 详细设计：`docs/PHASE_1.md`
 - Story 列表：`docs/STORIES.md`
@@ -103,9 +104,9 @@ So that {{ 目的 }}.
 完成后请确认以下所有项：
 
 **代码层面：**
-- [ ] TypeScript 编译无报错（`pnpm tsc --noEmit`）
+- [ ] TypeScript 编译无报错（`pnpm typecheck`）
+- [ ] ESLint 零警告（`pnpm lint`）— 这会机器验证：无 `any`、无裸 `console.log`、无裸 `process.env`、无中文字符
 - [ ] 所有 AC 逐条对应实现，未遗漏
-- [ ] 无 `any` 类型，无裸 `process.env` 调用，无裸 `console.log`
 - [ ] 新建文件的路径与 `docs/PHASE_1.md` 中定义的目录结构一致
 
 **自检报告（完成后输出）：**
@@ -189,7 +190,8 @@ ClinicHub/
 ## 交付标准
 
 完成后请确认：
-- [ ] `pnpm tsc --noEmit` 无报错
+- [ ] `pnpm typecheck` 无报错
+- [ ] `pnpm lint` 零警告
 - [ ] 所有 AC 逐条实现
 
 请输出自检报告。

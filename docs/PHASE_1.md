@@ -110,10 +110,10 @@ export async function safeClick(
   description: string
 ): Promise<void> {
   if (isDryRun) {
-    logger.info(`[DRY-RUN] 跳过点击: ${description} (选择器: ${selector})`);
+    logger.info(`[DRY-RUN] Skip click: ${description} (selector: ${selector})`);
     return;
   }
-  logger.info(`执行点击: ${description}`);
+  logger.info(`Clicking: ${description}`);
   await page.click(selector);
 }
 
@@ -124,22 +124,22 @@ export async function safeFill(
   description: string
 ): Promise<void> {
   if (isDryRun) {
-    logger.info(`[DRY-RUN] 跳过填写: ${description} = "${value}"`);
+    logger.info(`[DRY-RUN] Skip fill: ${description} = "${value}"`);
     return;
   }
-  logger.info(`填写字段: ${description}`);
+  logger.info(`Filling field: ${description}`);
   await page.fill(selector, value);
 }
 
 export async function confirmAction(description: string): Promise<boolean> {
-  // 在 Step Mode 或真实执行模式下，关键操作前需人工确认
+  // Requires human confirmation before irreversible actions in real mode
   if (isDryRun) return false;
   
   const readline = require('readline');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   
   return new Promise((resolve) => {
-    rl.question(`\n[确认操作] ${description}\n输入 yes 继续，其他任意键跳过: `, (answer) => {
+    rl.question(`\n[Confirm action] ${description}\nType "yes" to continue, anything else to skip: `, (answer) => {
       rl.close();
       resolve(answer.toLowerCase() === 'yes');
     });
@@ -160,44 +160,43 @@ export async function runReviewAndReply(config: TaskConfig): Promise<TaskResult>
   const page = await context.newPage();
   
   try {
-    // ① 登录第三方系统
+    // Step 1: Login to third-party system
     const loginPage = new ThirdPartyLoginPage(page);
     await loginPage.navigate();
     await screenshot(page, '01-before-login');
     await loginPage.login(config.thirdPartyUsername, config.thirdPartyPassword);
     await screenshot(page, '02-after-login');
-    logger.info('登录成功');
+    logger.info('Login successful');
 
-    // ② 获取患者报告列表
+    // Step 2: Fetch patient report list
     const listPage = new PatientReportListPage(page);
     await listPage.navigate();
     await screenshot(page, '03-report-list');
     const reports = await listPage.getReportList();
-    logger.info(`找到 ${reports.length} 条患者报告`);
+    logger.info(`Found ${reports.length} patient report(s)`);
 
-    // ③ 逐一处理每条报告
+    // Step 3: Process each report
     for (const report of reports) {
-      logger.info(`处理报告: 患者 ${report.patientId}`);
+      logger.info(`Processing report for patient: ${report.patientId}`);
       
       const detailPage = new PatientReportDetailPage(page);
       await detailPage.open(report.id);
       await screenshot(page, `04-report-${report.patientId}`);
 
-      // 提取报告数据
       const reportData = await detailPage.extractData();
       
-      // 填写回复（Dry-Run 下只打日志）
-      await safeFill(page, detailPage.replySelector, reportData.replyContent, '填写医生回复');
+      // Fill reply (dry-run: log only, no actual write)
+      await safeFill(page, detailPage.replySelector, reportData.replyContent, 'Fill doctor reply');
       await screenshot(page, `05-reply-filled-${report.patientId}`);
 
-      // 保存（需要人工确认）
-      const confirmed = await confirmAction(`保存患者 ${report.patientId} 的回复`);
+      // Save (requires human confirmation)
+      const confirmed = await confirmAction(`Save reply for patient ${report.patientId}`);
       if (confirmed) {
-        await safeClick(page, detailPage.saveButtonSelector, '点击保存');
+        await safeClick(page, detailPage.saveButtonSelector, 'Click save');
         await screenshot(page, `06-saved-${report.patientId}`);
       }
 
-      // ④ 发送邮件
+      // Step 4: Send notification email
       await sendEmailForReport(context, reportData, config);
     }
 
@@ -205,7 +204,7 @@ export async function runReviewAndReply(config: TaskConfig): Promise<TaskResult>
     
   } catch (error) {
     await screenshot(page, 'ERROR-screenshot');
-    logger.error('工作流执行失败', error);
+    logger.error('Workflow execution failed', error);
     throw error;
   } finally {
     await context.close();

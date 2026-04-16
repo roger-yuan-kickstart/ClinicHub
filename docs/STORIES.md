@@ -36,17 +36,29 @@
 **状态：** `[ ]`
 
 **As a** developer setting up the project for the first time,
-**I want** a properly initialized TypeScript project with all configuration files in place,
-**So that** any agent can clone the repo and immediately start writing code without setup friction.
+**I want** a properly initialized TypeScript project with all configuration files and linting rules in place,
+**So that** any agent can clone the repo and immediately start writing code without setup friction, and all architectural constraints are machine-enforced from day one.
 
 **Acceptance Criteria:**
-- [ ] `package.json` 存在，包含 `scripts.start`（`ts-node src/runner.ts`）和 `scripts.dev`（`ts-node-dev src/runner.ts`）
+- [ ] `package.json` 存在，包含以下 scripts：
+  - `start`：`ts-node src/runner.ts`
+  - `dev`：`ts-node-dev src/runner.ts`
+  - `lint`：`eslint "src/**/*.ts" --max-warnings 0`
+  - `lint:fix`：`eslint "src/**/*.ts" --fix`
+  - `typecheck`：`tsc --noEmit`
 - [ ] `tsconfig.json` 配置正确，`strict: true`，`target: ES2020`，`moduleResolution: node`
 - [ ] `pnpm` 为包管理器，`package.json` 中有 `packageManager` 字段锁定版本
-- [ ] `.gitignore` 包含：`.env`、`node_modules/`、`screenshots/`、`logs/`、`*.har`
+- [ ] `.gitignore` 包含：`.env`、`node_modules/`、`screenshots/`、`logs/`、`*.har`、`recordings/*.har`
 - [ ] `.env.example` 包含所有必需的环境变量（含注释说明），**不含任何真实值**
 - [ ] `README.md` 包含：项目简介、如何安装依赖、如何运行（Dry-Run 和真实模式）、目录结构说明
-- [ ] 依赖安装：`typescript`、`ts-node`、`ts-node-dev`、`playwright`、`@playwright/test`、`dotenv`、`pino`
+- [ ] **运行时依赖**：`dotenv`、`pino`、`pino-pretty`
+- [ ] **开发依赖**：`typescript`、`ts-node`、`ts-node-dev`、`playwright`、`@playwright/test`、`@types/node`、`eslint`、`@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin`
+- [ ] **`.eslintrc.json` 存在**，包含以下强制规则（机器执行架构约束）：
+  - `no-console: error` — 禁止裸 `console.log`（必须用 `logger`）
+  - `no-restricted-syntax` — 禁止直接访问 `process.env`（必须通过 `src/config.ts`）
+  - `@typescript-eslint/no-explicit-any: error` — 禁止 `any` 类型
+  - `no-restricted-globals` — 禁止在代码文件中出现中文 Unicode 字符（\u4e00-\u9fff 范围）
+- [ ] `pnpm lint` 在空项目上运行无报错（配置本身有效）
 
 **Depends on:** 无（第一个 Story）
 
@@ -446,7 +458,7 @@ STORY-007 (浏览器初始化)
 
 | Story | 标题 | 执行者 | 状态 | 备注 |
 |---|---|---|---|---|
-| STORY-001 | 项目脚手架与基础配置 | Agent | `[ ] 待开始` | — |
+| STORY-001 | 项目脚手架与基础配置 | Agent | `[ ] 待开始` | 含 ESLint 配置，机器执行架构约束 |
 | STORY-002 | 环境变量加载与校验 | Agent | `[ ] 待开始` | 依赖 001 |
 | STORY-003 | 统一日志工具 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |
