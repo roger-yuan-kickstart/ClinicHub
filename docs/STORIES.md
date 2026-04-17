@@ -90,19 +90,19 @@
 
 ### STORY-003 — 统一日志工具
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer debugging automation runs,
 **I want** structured, timestamped log output to both console and a local file,
 **So that** I can review exactly what the script did during any given run, even after the terminal is closed.
 
 **Acceptance Criteria:**
-- [ ] `src/logger.ts` 导出一个 `logger` 实例（基于 `pino`）
-- [ ] 日志同时输出到：控制台（human-readable 格式）和本地文件（`./logs/YYYY-MM-DD.log`，JSON 格式）
-- [ ] 日志级别：`info`、`warn`、`error`，通过 `LOG_LEVEL` 环境变量控制（默认 `info`）
-- [ ] 每条日志包含：时间戳（ISO 格式）、级别、消息
-- [ ] 应用启动时自动创建 `logs/` 目录（如不存在）
-- [ ] `logger.error` 传入 `Error` 对象时，自动输出 `stack trace`
+- [x] `src/logger.ts` 导出一个 `logger` 实例（基于 `pino`）
+- [x] 日志同时输出到：控制台（human-readable 格式）和本地文件（`./logs/YYYY-MM-DD.log`，JSON 格式）
+- [x] 日志级别：`info`、`warn`、`error`，通过 `LOG_LEVEL` 环境变量控制（默认 `info`）
+- [x] 每条日志包含：时间戳（ISO 格式）、级别、消息
+- [x] 应用启动时自动创建 `logs/` 目录（如不存在）
+- [x] `logger.error` 传入 `Error` 对象时，自动输出 `stack trace`
 
 **Depends on:** STORY-002
 
@@ -553,7 +553,7 @@ STORY-007 (浏览器初始化)
 |---|---|---|---|---|
 | STORY-001 | 项目脚手架与基础配置 | Agent | `[x] 已完成` | 含 ESLint 配置；`recordings/` 整目录 gitignore |
 | STORY-002 | 环境变量加载与校验 | Agent | `[x] 已完成` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
-| STORY-003 | 统一日志工具 | Agent | `[ ] 待开始` | 依赖 002 |
+| STORY-003 | 统一日志工具 | Agent | `[x] 已完成` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |
 | STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 本地 HTTP 面板，截图高亮 + 人工确认；依赖 004 |
 | STORY-005 | 截图工具模块 | Agent | `[ ] 待开始` | 依赖 003 |
@@ -570,7 +570,7 @@ STORY-007 (浏览器初始化)
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 2 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 3 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
