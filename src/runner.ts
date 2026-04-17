@@ -1,9 +1,8 @@
-import { config } from './config';
+import { logger } from './logger';
 
 async function main(): Promise<void> {
-  // Entry point. Story 003 wires structured logging.
-  // Importing `config` validates environment variables at startup (Story 002).
-  void config;
+  // Importing `logger` loads `config` first, so required env vars are validated at startup (Story 002).
+  logger.info('ClinicHub runner started');
 }
 
 main().catch((error: unknown) => {
