@@ -18,6 +18,8 @@
 > - **Acceptance Criteria**：完成标准（Agent 交付前必须全部满足）
 > - **Depends on**：必须先完成的 Story
 > - **Assigned to**：由哪个 Agent 负责
+>
+> **Git — Feature branch 命名：** 每个 Story 的实现工作放在单独的功能分支上；分支名**统一以 `feature/` 为前缀**（例：`feature/story-002-config`、`feature/story-004-dry-run`）。从 `main` 拉出分支，完成后开 PR 合并回 `main`。不要使用其它前缀（如 `featurebench/`）作为常规约定。
 
 ---
 
@@ -33,7 +35,7 @@
 
 ### STORY-001 — 项目脚手架与基础配置
 
-**状态：** `[~]`
+**状态：** `[x]`
 
 **As a** developer setting up the project for the first time,
 **I want** a properly initialized TypeScript project with all configuration files and linting rules in place,
@@ -48,16 +50,16 @@
   - `typecheck`：`tsc --noEmit`
 - [x] `tsconfig.json` 配置正确，`strict: true`，`target: ES2020`，`moduleResolution: node`
 - [x] `pnpm` 为包管理器，`package.json` 中有 `packageManager` 字段锁定版本
-- [x] `.gitignore` 包含：`.env`、`node_modules/`、`screenshots/`、`logs/`、`*.har`、`recordings/*.har`
+- [x] `.gitignore` 包含：`.env`、`node_modules/`、`screenshots/`、`logs/`、`*.har`、`recordings/`（整目录忽略，覆盖 `auth.json` 与 `*.har`，避免会话状态被误提交）
 - [x] `.env.example` 包含所有必需的环境变量（含注释说明），**不含任何真实值**
 - [x] `README.md` 包含：项目简介、如何安装依赖、如何运行（Dry-Run 和真实模式）、目录结构说明
-- [x] **运行时依赖**：`dotenv`、`pino`、`pino-pretty`
-- [x] **开发依赖**：`typescript`、`ts-node`、`ts-node-dev`、`playwright`、`@playwright/test`、`@types/node`、`eslint`、`@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin`
+- [x] **运行时依赖**：`dotenv`、`pino`
+- [x] **开发依赖**：`typescript`、`ts-node`、`ts-node-dev`、`playwright`、`@playwright/test`、`@types/node`、`eslint`、`@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin`、`pino-pretty`
 - [x] **`.eslintrc.json` 存在**，包含以下强制规则（机器执行架构约束）：
   - `no-console: error` — 禁止裸 `console.log`（必须用 `logger`）
-  - `no-restricted-syntax` — 禁止直接访问 `process.env`（必须通过 `src/config.ts`）
+  - `no-restricted-syntax` — 禁止直接访问 `process.env`（必须通过 `src/config.ts`）；禁止源码中出现中文 Unicode 字面量与模板字符串（\u4e00-\u9fff）
   - `@typescript-eslint/no-explicit-any: error` — 禁止 `any` 类型
-  - `no-restricted-globals` — 禁止在代码文件中出现中文 Unicode 字符（\u4e00-\u9fff 范围）
+  - `no-restricted-globals` — 禁止在 Node 自动化代码中误用浏览器全局（`window`、`document`）
 - [x] `pnpm lint` 在空项目上运行无报错（配置本身有效）
 
 **Depends on:** 无（第一个 Story）
@@ -549,7 +551,7 @@ STORY-007 (浏览器初始化)
 
 | Story | 标题 | 执行者 | 状态 | 备注 |
 |---|---|---|---|---|
-| STORY-001 | 项目脚手架与基础配置 | Agent | `[~] 进行中` | 含 ESLint 配置；实现见 PR，合并后改 `[x]` |
+| STORY-001 | 项目脚手架与基础配置 | Agent | `[x] 已完成` | 含 ESLint 配置；`recordings/` 整目录 gitignore |
 | STORY-002 | 环境变量加载与校验 | Agent | `[ ] 待开始` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |

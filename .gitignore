@@ -3,5 +3,5 @@ node_modules/
 screenshots/
 logs/
 *.har
-recordings/*.har
+recordings/
 dist/
