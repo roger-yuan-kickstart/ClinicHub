@@ -1,5 +1,9 @@
+import { config } from './config';
+
 async function main(): Promise<void> {
-  // Entry point. Story 002 wires config; Story 003 wires structured logging.
+  // Entry point. Story 003 wires structured logging.
+  // Importing `config` validates environment variables at startup (Story 002).
+  void config;
 }
 
 main().catch((error: unknown) => {

@@ -40,5 +40,23 @@
         "message": "Browser globals are not allowed in Node automation code."
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/config.ts"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value=/[\\u4e00-\\u9fff]/]",
+            "message": "Chinese characters are not allowed in source code."
+          },
+          {
+            "selector": "TemplateElement[value.raw=/[\\u4e00-\\u9fff]/]",
+            "message": "Chinese characters are not allowed in source code."
+          }
+        ]
+      }
+    }
+  ]
 }

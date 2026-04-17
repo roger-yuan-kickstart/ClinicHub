@@ -68,21 +68,21 @@
 
 ### STORY-002 — 环境变量加载与校验模块
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer running the automation script,
 **I want** all environment variables to be loaded and validated at startup,
 **So that** the script fails fast with a clear error message if any required config is missing, rather than crashing midway through a patient report.
 
 **Acceptance Criteria:**
-- [ ] `src/config.ts` 导出一个 `config` 对象，包含所有环境变量字段（TypeScript 强类型）
-- [ ] 启动时检查所有必填字段：`THIRD_PARTY_URL`、`THIRD_PARTY_USERNAME`、`THIRD_PARTY_PASSWORD`、`WEBMAIL_URL`、`WEBMAIL_USERNAME`、`WEBMAIL_PASSWORD`、`TEST_EMAIL_RECIPIENT`
-- [ ] 缺少任意必填字段时，启动立即失败，错误信息明确列出所有缺失的变量名
-- [ ] `DRY_RUN`、`STEP_MODE`、`BROWSER_HEADLESS` 等布尔值字段有合理默认值（`DRY_RUN` 默认 `true`，`BROWSER_HEADLESS` 默认 `false`）
-- [ ] `SLOW_MO_MS` 默认 `500`，可在 `.env` 中覆盖
-- [ ] `SCREENSHOT_DIR` 和 `LOG_DIR` 在 `config.ts` 中读取，默认值分别为 `./screenshots` 和 `./logs`
-- [ ] `SESSION_STATE_PATH` 默认 `./recordings/auth.json`，指向已登录 Session 的存储文件
-- [ ] `SUPERVISED_MODE` 布尔值，默认 `false`；为 `true` 时每步操作前弹出本地 UI 确认面板
+- [x] `src/config.ts` 导出一个 `config` 对象，包含所有环境变量字段（TypeScript 强类型）
+- [x] 启动时检查所有必填字段：`THIRD_PARTY_URL`、`THIRD_PARTY_USERNAME`、`THIRD_PARTY_PASSWORD`、`WEBMAIL_URL`、`WEBMAIL_USERNAME`、`WEBMAIL_PASSWORD`、`TEST_EMAIL_RECIPIENT`
+- [x] 缺少任意必填字段时，启动立即失败，错误信息明确列出所有缺失的变量名
+- [x] `DRY_RUN`、`STEP_MODE`、`BROWSER_HEADLESS` 等布尔值字段有合理默认值（`DRY_RUN` 默认 `true`，`BROWSER_HEADLESS` 默认 `false`）
+- [x] `SLOW_MO_MS` 默认 `500`，可在 `.env` 中覆盖
+- [x] `SCREENSHOT_DIR` 和 `LOG_DIR` 在 `config.ts` 中读取，默认值分别为 `./screenshots` 和 `./logs`
+- [x] `SESSION_STATE_PATH` 默认 `./recordings/auth.json`，指向已登录 Session 的存储文件
+- [x] `SUPERVISED_MODE` 布尔值，默认 `false`；为 `true` 时每步操作前弹出本地 UI 确认面板
 
 **Depends on:** STORY-001
 
@@ -552,7 +552,7 @@ STORY-007 (浏览器初始化)
 | Story | 标题 | 执行者 | 状态 | 备注 |
 |---|---|---|---|---|
 | STORY-001 | 项目脚手架与基础配置 | Agent | `[x] 已完成` | 含 ESLint 配置；`recordings/` 整目录 gitignore |
-| STORY-002 | 环境变量加载与校验 | Agent | `[ ] 待开始` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
+| STORY-002 | 环境变量加载与校验 | Agent | `[x] 已完成` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |
 | STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 本地 HTTP 面板，截图高亮 + 人工确认；依赖 004 |
@@ -570,7 +570,7 @@ STORY-007 (浏览器初始化)
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 1 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 2 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
