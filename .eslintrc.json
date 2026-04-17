@@ -1,0 +1,44 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2020": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "rules": {
+    "no-console": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "MemberExpression[object.name='process'][property.name='env']",
+        "message": "Do not access process.env directly. Use src/config.ts (Story 002)."
+      },
+      {
+        "selector": "Literal[value=/[\\u4e00-\\u9fff]/]",
+        "message": "Chinese characters are not allowed in source code."
+      },
+      {
+        "selector": "TemplateElement[value.raw=/[\\u4e00-\\u9fff]/]",
+        "message": "Chinese characters are not allowed in source code."
+      }
+    ],
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "window",
+        "message": "Browser globals are not allowed in Node automation code."
+      },
+      {
+        "name": "document",
+        "message": "Browser globals are not allowed in Node automation code."
+      }
+    ]
+  }
+}
