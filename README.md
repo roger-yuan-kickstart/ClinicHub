@@ -17,6 +17,7 @@
 ## 第一个功能（Feature 1）概述
 
 **场景：**
+
 - 医生登录第三方医疗管理系统
 - 查看分配给自己的患者报告
 - 在系统中填写回复内容并保存
@@ -29,7 +30,7 @@
 ## 文档索引
 
 | 文档 | 内容 |
-|---|---|
+| --- | --- |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 技术选型决策、架构原则、各组件说明 |
 | [docs/PHASE_1.md](docs/PHASE_1.md) | Phase 1 MVP 详细实施计划（当前阶段） |
 | [docs/PHASE_2.md](docs/PHASE_2.md) | Phase 2 完整生产架构详细设计 |
@@ -52,3 +53,59 @@
 3. **代码云厂商无关：** 不直接调用 AWS SDK 或 Azure SDK，通过抽象接口层访问云服务，便于切换云厂商。
 4. **分阶段演进：** Phase 1 只跑通链路，Phase 2 才做工程化，不提前过度设计。
 5. **明文密码零容忍：** 凭据必须加密存储，代码库中不出现任何账号密码。
+
+---
+
+## 开发与运行（Phase 1）
+
+### 依赖安装
+
+本项目使用 **pnpm** 作为包管理器（版本见 `package.json` 的 `packageManager` 字段）。
+
+```bash
+pnpm install
+```
+
+若本机未安装 pnpm，可使用 Corepack（Node 18+）：
+
+```bash
+corepack enable
+corepack prepare pnpm@9.15.4 --activate
+```
+
+### 常用命令
+
+```bash
+pnpm typecheck   # TypeScript compile check
+pnpm lint        # ESLint (zero warnings)
+pnpm start       # Run entrypoint once (ts-node)
+pnpm dev         # Run with reload (ts-node-dev)
+```
+
+### Dry-Run 与真实模式
+
+环境变量模板见根目录 `.env.example`。复制为本地 `.env` 并填入测试凭据（**不要提交 `.env`**）。
+
+- **Dry-Run（推荐默认）：** 在 `.env` 中设置 `DRY_RUN=true`。写入类操作应由 `src/automation/dryRun.ts`（Story 004）拦截为仅日志；在 Story 004 落地前，仍请保持 `DRY_RUN=true` 作为安全默认。
+- **真实模式：** 设置 `DRY_RUN=false` 并确认你已理解所有写操作风险；建议同时按需开启 `STEP_MODE=true` 以便逐步确认。
+
+入口脚本为 `src/runner.ts`。配置加载与校验将在 Story 002（`src/config.ts`）完成后成为启动路径的一部分。
+
+### 目录结构（Phase 1）
+
+```
+ClinicHub/
+├── package.json
+├── tsconfig.json
+├── .eslintrc.json
+├── .env                 # local only (gitignored)
+├── .env.example
+├── src/
+│   └── runner.ts        # entry point
+├── docs/                # architecture and stories
+├── featurebench/        # local verification notes per story
+├── screenshots/         # created at runtime (gitignored)
+└── logs/                # created at runtime (gitignored)
+```
+
+更完整的 `src/` 布局见 [docs/PHASE_1.md](docs/PHASE_1.md)。

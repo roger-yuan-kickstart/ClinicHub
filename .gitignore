@@ -1,0 +1,7 @@
+.env
+node_modules/
+screenshots/
+logs/
+*.har
+recordings/*.har
+dist/
