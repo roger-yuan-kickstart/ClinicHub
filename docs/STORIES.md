@@ -79,6 +79,8 @@
 - [ ] `DRY_RUN`、`STEP_MODE`、`BROWSER_HEADLESS` 等布尔值字段有合理默认值（`DRY_RUN` 默认 `true`，`BROWSER_HEADLESS` 默认 `false`）
 - [ ] `SLOW_MO_MS` 默认 `500`，可在 `.env` 中覆盖
 - [ ] `SCREENSHOT_DIR` 和 `LOG_DIR` 在 `config.ts` 中读取，默认值分别为 `./screenshots` 和 `./logs`
+- [ ] `SESSION_STATE_PATH` 默认 `./recordings/auth.json`，指向已登录 Session 的存储文件
+- [ ] `SUPERVISED_MODE` 布尔值，默认 `false`；为 `true` 时每步操作前弹出本地 UI 确认面板
 
 **Depends on:** STORY-001
 
@@ -121,6 +123,33 @@
 - [ ] 所有 Dry-Run 日志带有 `[DRY-RUN]` 前缀，便于日志过滤
 
 **Depends on:** STORY-003
+
+---
+
+### STORY-004b — Supervised UI 确认面板
+
+**状态：** `[ ]`
+
+**As a** developer running automation against a live production system,
+**I want** a local web UI panel that shows me exactly what action is about to be executed—with a screenshot and element highlight—before it happens,
+**So that** I can visually verify each step and click "Confirm" before the automation proceeds, eliminating the risk of executing wrong actions on the real system.
+
+**Acceptance Criteria:**
+- [ ] `src/automation/supervisedUI.ts` 导出 `SupervisedUI` 类，包含 `start()`、`stop()`、`requestConfirmation(step)` 三个方法
+- [ ] `start()` 在本地启动一个轻量 HTTP 服务（默认端口 `7788`），服务静态 HTML 确认面板
+- [ ] `requestConfirmation(step)` 接收以下结构，并在面板上展示：
+  - `description: string` — 操作描述（例："点击「保存回复」按钮"）
+  - `screenshotBase64: string` — 操作前当前页面截图（base64 PNG）
+  - `targetRect?: { x, y, width, height }` — 即将操作的元素在截图上的坐标，面板用红框标注
+  - `windowLabel?: string` — 当前操作的窗口名称（例："ThirdParty" 或 "Webmail"）
+- [ ] 面板显示两个按钮：**Confirm（确认执行）** 和 **Skip（跳过此步）**
+- [ ] `requestConfirmation` 返回 `Promise<'confirm' | 'skip'>`，等待用户在面板点击后 resolve
+- [ ] `SUPERVISED_MODE=false` 时，`requestConfirmation` 直接返回 `'confirm'`，不启动 HTTP 服务（零开销）
+- [ ] `dryRun.ts` 的 `safeClick` 和 `safeFill` 在 `SUPERVISED_MODE=true` 时，操作前自动调用 `requestConfirmation`
+- [ ] 面板 HTML 极简：截图显示区（带红框标注）+ 操作描述文字 + 两个按钮；不引入任何前端框架
+- [ ] `stop()` 安全关闭 HTTP 服务，在 `runner.ts` 的 `finally` 块中调用
+
+**Depends on:** STORY-004
 
 ---
 
@@ -192,15 +221,17 @@
 **状态：** `[ ]`
 
 **As a** developer automating the clinic workflow,
-**I want** the third-party system login logic encapsulated in a Page Object,
-**So that** if the login page UI changes, I only need to update one file—not hunt through workflow code.
+**I want** the third-party system login logic encapsulated in a Page Object that supports both fresh login and session restore,
+**So that** daily automation runs skip the login step entirely by restoring a saved session, and only re-login when the session has expired.
 
 **Acceptance Criteria:**
 - [ ] `src/automation/pages/ThirdPartyLoginPage.ts` 导出 `ThirdPartyLoginPage` 类
-- [ ] 构造函数接收 `page: Page` 参数
+- [ ] 构造函数接收 `page: Page` 和 `context: BrowserContext` 参数
 - [ ] `navigate()` 方法：导航到 `THIRD_PARTY_URL`，等待页面加载完成
-- [ ] `login(username, password)` 方法：填写用户名、密码、点击登录按钮，等待登录成功
-- [ ] 登录成功判断：等待登录后才出现的特征元素（例如导航栏、Dashboard 标题）
+- [ ] `loginFresh(username, password)` 方法：填写用户名、密码、点击登录按钮，等待登录成功（首次建立 Session 时使用）
+- [ ] `saveSession(path: string)` 方法：调用 `context.storageState({ path })`，将当前 Cookie 和 LocalStorage 保存到文件；日志打印保存路径
+- [ ] `restoreSession(path: string)` 方法：检查 `path` 文件是否存在；存在则调用 `context.storageState` 加载并导航到主页，不存在则抛出描述性 `Error` 提示用户先运行 `saveSession`
+- [ ] `isLoggedIn()` 方法：检查当前页面是否存在登录后才出现的特征元素，返回 `boolean`（用于 Session 失效检测）
 - [ ] 登录失败时（超时或出现错误提示）抛出描述性 `Error`，包含失败原因
 - [ ] 所有选择器定义为类的 `private readonly` 属性（集中管理，禁止硬编码在方法中）
 - [ ] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
@@ -271,27 +302,82 @@
 
 ---
 
-### STORY-012 — Playwright Codegen 录制会话
+### STORY-012a — 交互式选择器采集工具
+
+**状态：** `[ ]`
+
+**As a** developer who needs to identify real selectors from the third-party system,
+**I want** an interactive CLI tool that lets me hover over elements and capture their selectors one by one with my confirmation,
+**So that** I can build SELECTORS.md incrementally across multiple sessions, handling multi-window flows and branching UI states cleanly.
+
+**Acceptance Criteria:**
+- [ ] `src/tools/selectorCapture.ts` 是工具入口，通过 `pnpm selector-capture` 启动
+- [ ] 启动时加载 `SESSION_STATE_PATH` 中已保存的登录 Session（跳过登录步骤）；若文件不存在则提示用户先保存 Session
+- [ ] 工具支持同时管理多个 Page，通过 CLI 命令 `window <label>` 切换当前操作窗口（例：`window ThirdParty`、`window Webmail`）
+- [ ] 在浏览器页面上注入高亮脚本：鼠标悬停时用蓝色边框标注当前元素，点击时捕获该元素
+- [ ] 每次捕获后，CLI 打印以下信息供确认：
+  - 当前窗口标签（`windowLabel`）
+  - 生成的 CSS 选择器（优先级：`id` > `data-*` > `aria-label` > `role+text` > 层级路径）
+  - 元素可见文本（前 50 字符）
+  - 元素类型（`input`、`button`、`div` 等）
+- [ ] CLI 交互命令：
+  - `name <stepName>` — 为下一次捕获命名（例：`name report-content-read`）
+  - `type <read|click|fill>` — 标记动作类型
+  - `ok` — 确认并写入 SELECTORS.md
+  - `skip` — 丢弃当前捕获，重新选择
+  - `note <text>` — 为当前条目添加备注（用于描述分支场景）
+  - `done` — 结束当前分段，打印已采集摘要
+  - `quit` — 退出工具
+- [ ] 所有确认的条目追加写入 `./recordings/SELECTORS.md`，格式为结构化 Markdown 表格（含 `stepName`、`windowLabel`、`actionType`、`selector`、`note` 列）
+- [ ] **多窗口支持**：`window <label>` 命令打开或切换到对应 Page；工具自动监听 `context.on('page')` 事件检测新窗口
+- [ ] `package.json` 中新增 script：`"selector-capture": "ts-node src/tools/selectorCapture.ts"`
+
+**Depends on:** STORY-007, STORY-008（需要 restoreSession 能力）
+
+---
+
+### STORY-012 — 选择器采集会话（分段录制）
 
 **状态：** `[ ]`
 
 > ⚠️ **这个 Story 由人类完成，不是 Agent 任务。**
 >
-> 这是 Phase 1 开发的关键节点：需要开发者手动操作第三方系统，让 Playwright 录制真实的选择器和操作流程。
+> 使用 STORY-012a 提供的交互式工具，分段完成所有关键选择器的采集。每段采集对应一个子流程，采集完成后人工确认再继续下一段。
 
 **As a** developer who has access to the real clinic system,
-**I want** to record a complete manual walkthrough of the full workflow using Playwright Codegen,
-**So that** all subsequent Page Objects can be filled with real, working selectors.
+**I want** to use the interactive selector capture tool to identify all real selectors across the full workflow in separate focused sessions,
+**So that** all Page Objects can be filled with accurate, verified selectors without the noise of a single end-to-end recording.
 
 **Acceptance Criteria:**
-- [ ] 执行 `pnpm exec playwright codegen --save-har=./recordings/session.har {THIRD_PARTY_URL}` 启动录制
-- [ ] 录制覆盖完整流程：登录 → 报告列表 → 打开报告 → 填写回复 → 跳转邮件平台 → 撰写邮件 → 发送
-- [ ] 录制生成的 TypeScript 代码保存到 `./recordings/codegen-output.ts`（提交 Git，供 Agent 参考）
-- [ ] HAR 文件保存到 `./recordings/session.har`（加入 `.gitignore`，因可能含敏感数据）
-- [ ] 录制完成后，在 `./recordings/SELECTORS.md` 中手工整理所有关键元素的选择器和页面跳转 URL
-- [ ] 将 `SELECTORS.md` 中的选择器同步更新到 STORY-008 ~ STORY-011 的 Page Object 中
 
-**Depends on:** STORY-008, STORY-009, STORY-010, STORY-011（Page Object 骨架需先建好，录制后填入真实选择器）
+**Session 0 — 保存登录 Session（一次性）：**
+- [ ] 手动打开浏览器，登录第三方系统
+- [ ] 执行 `saveSession()` 将 Cookie/Session 保存到 `./recordings/auth.json`
+- [ ] 验证 `auth.json` 文件生成且非空；将 `auth.json` 加入 `.gitignore`
+
+**Session 1 — 第三方系统：报告列表页：**
+- [ ] 启动 `pnpm selector-capture`，自动恢复登录 Session
+- [ ] 采集：报告列表容器、单条报告行、患者 ID 字段、报告状态字段
+- [ ] 全部条目 `ok` 确认，写入 `SELECTORS.md`
+
+**Session 2 — 第三方系统：报告详情页（含分支）：**
+- [ ] 打开一条「未回复」报告，采集：报告内容区、回复输入框、保存按钮
+- [ ] 使用 `note` 标记「未回复状态」分支
+- [ ] 打开一条「已回复」报告，采集差异选择器，使用 `note` 标记「已回复状态」分支
+- [ ] 全部条目 `ok` 确认，写入 `SELECTORS.md`
+
+**Session 3 — 多窗口：从第三方系统复制到 Webmail：**
+- [ ] 在 `ThirdParty` 窗口采集报告内容的 `read` 选择器
+- [ ] 执行 `window Webmail` 切换到 Webmail 窗口，采集邮件正文框的 `fill` 选择器
+- [ ] 采集：收件人字段、主题字段、发送按钮
+- [ ] 全部条目 `ok` 确认，写入 `SELECTORS.md`
+
+**最终交付：**
+- [ ] `./recordings/SELECTORS.md` 包含所有 Session 采集的完整选择器表格
+- [ ] 将 `SELECTORS.md` 中的选择器同步更新到 STORY-008 ~ STORY-011 的 Page Object 中
+- [ ] 删除所有 Page Object 中的 `placeholder` 注释
+
+**Depends on:** STORY-012a, STORY-008, STORY-009, STORY-010, STORY-011
 
 ---
 
@@ -307,15 +393,16 @@
 - [ ] `src/automation/workflows/ReviewAndReplyWorkflow.ts` 导出 `runReviewAndReply(config: TaskConfig): Promise<TaskResult>` 函数
 - [ ] 严格按照以下步骤编排（每步之间截图）：
   1. 初始化浏览器 & BrowserContext
-  2. 登录第三方系统（截图：`01-before-login`、`02-after-login`）
-  3. 获取报告列表（截图：`03-report-list`）
+  2. 恢复登录 Session：调用 `restoreSession(SESSION_STATE_PATH)`；若 Session 已失效（`isLoggedIn()` 返回 `false`），自动回退到 `loginFresh()` 并重新保存 Session（截图：`01-session-restored` 或 `01-fresh-login`）
+  3. 获取报告列表（截图：`02-report-list`）
   4. 遍历每条报告：
-     - 打开报告详情（截图：`04-report-{patientId}`）
-     - 提取报告数据
-     - 填写回复（通过 `safeFill`）（截图：`05-reply-filled-{patientId}`）
-     - Human-in-loop 确认保存
-     - 点击保存（通过 `safeClick`）（截图：`06-saved-{patientId}`）
-     - 发送邮件（调用 `sendEmailForReport`，独立函数）
+     - 打开报告详情（截图：`03-report-{patientId}`）
+     - 提取报告数据（`extractData()`）
+     - `SUPERVISED_MODE=true` 时：调用 `supervisedUI.requestConfirmation` 展示截图，等待用户点击「确认执行」后再继续
+     - 填写回复（通过 `safeFill`）（截图：`04-reply-filled-{patientId}`）
+     - Human-in-loop 确认保存（`confirmAction`）
+     - 点击保存（通过 `safeClick`）（截图：`05-saved-{patientId}`）
+     - 发送邮件（调用 `sendEmailForReport`，独立函数，内部切换到 Webmail 窗口）
   5. 写入汇总日志
   6. 关闭浏览器
 - [ ] 任何步骤抛出异常时：截图（`ERROR-{timestamp}`），日志记录详细错误，然后抛出
@@ -402,23 +489,27 @@
 ```
 STORY-001 (脚手架)
     ↓
-STORY-002 (配置加载)
+STORY-002 (配置加载，含 SESSION_STATE_PATH / SUPERVISED_MODE)
     ↓
 STORY-003 (日志工具)
     ├──→ STORY-004 (Dry-Run 机制)
+    │        ↓
+    │    STORY-004b (Supervised UI 确认面板)
     └──→ STORY-005 (截图工具)
          ↓
 STORY-006 (类型定义)
     ↓
 STORY-007 (浏览器初始化)
-    ├──→ STORY-008 (POM: 登录页)
+    ├──→ STORY-008 (POM: 登录页，含 restoreSession / saveSession)
     ├──→ STORY-009 (POM: 报告列表页)
     ├──→ STORY-010 (POM: 报告详情页)
     └──→ STORY-011 (POM: 邮件撰写页)
          ↓
-    STORY-012 ⚠️ [人类操作: Codegen 录制]
+    STORY-012a (Agent: 交互式选择器采集工具)
          ↓
-    STORY-013 (主工作流编排)
+    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3）]
+         ↓
+    STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI)
          ↓
     STORY-014 (主入口 Runner)
          ↓
@@ -459,26 +550,28 @@ STORY-007 (浏览器初始化)
 | Story | 标题 | 执行者 | 状态 | 备注 |
 |---|---|---|---|---|
 | STORY-001 | 项目脚手架与基础配置 | Agent | `[ ] 待开始` | 含 ESLint 配置，机器执行架构约束 |
-| STORY-002 | 环境变量加载与校验 | Agent | `[ ] 待开始` | 依赖 001 |
+| STORY-002 | 环境变量加载与校验 | Agent | `[ ] 待开始` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |
+| STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 本地 HTTP 面板，截图高亮 + 人工确认；依赖 004 |
 | STORY-005 | 截图工具模块 | Agent | `[ ] 待开始` | 依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006 |
-| STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 依赖 007，选择器待录制后补全 |
-| STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待录制后补全 |
-| STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待录制后补全 |
-| STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待录制后补全 |
-| STORY-012 | ⚠️ Codegen 录制会话 | **人类** | `[ ] 待开始` | 需亲自操作，依赖 008~011 骨架完成 |
-| STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 依赖 012 完成（真实选择器到位后） |
+| STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 新增 restoreSession / saveSession；依赖 007 |
+| STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
+| STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
+| STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
+| STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
+| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
+| STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
 | STORY-014 | 主入口 Runner | Agent | `[ ] 待开始` | 依赖 013 |
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 0 / 16 完成 &nbsp;|&nbsp; 🤖 Agent 任务：13 个 &nbsp;|&nbsp; 👤 人类任务：3 个
+**进度：** 0 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
-*最后更新：2026-04-15*
+*最后更新：2026-04-17*
 *文档维护：Top Agent（架构决策 & Story 设计）*
 *执行：Implementation Agent（Story 级别逐一完成）*
