@@ -12,7 +12,29 @@ const REQUIRED_ENV_KEYS = [
   'TEST_EMAIL_RECIPIENT',
 ] as const;
 
+const PINO_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
+
 type RequiredEnvKey = (typeof REQUIRED_ENV_KEYS)[number];
+type PinoLogLevelString = (typeof PINO_LOG_LEVELS)[number];
+
+export interface ClinicHubConfig {
+  dryRun: boolean;
+  stepMode: boolean;
+  browserHeadless: boolean;
+  supervisedMode: boolean;
+  slowMoMs: number;
+  screenshotDir: string;
+  logDir: string;
+  sessionStatePath: string;
+  logLevel: PinoLogLevelString;
+  thirdPartyUrl: string;
+  thirdPartyUsername: string;
+  thirdPartyPassword: string;
+  webmailUrl: string;
+  webmailUsername: string;
+  webmailPassword: string;
+  testEmailRecipient: string;
+}
 
 function readTrimmed(key: string): string | undefined {
   const value = process.env[key];
@@ -43,7 +65,11 @@ function parseNonNegativeInt(key: string, defaultValue: number): number {
   if (raw === undefined || raw.trim() === '') {
     return defaultValue;
   }
-  const parsed = Number.parseInt(raw, 10);
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) {
+    throw new Error(`Invalid non-negative integer for ${key}: ${raw}`);
+  }
+  const parsed = Number.parseInt(trimmed, 10);
   if (!Number.isFinite(parsed) || parsed < 0) {
     throw new Error(`Invalid non-negative integer for ${key}: ${raw}`);
   }
@@ -52,6 +78,19 @@ function parseNonNegativeInt(key: string, defaultValue: number): number {
 
 function readOptionalString(key: string, defaultValue: string): string {
   return readTrimmed(key) ?? defaultValue;
+}
+
+function parseLogLevel(key: string, defaultValue: PinoLogLevelString): PinoLogLevelString {
+  const raw = readTrimmed(key);
+  if (raw === undefined) {
+    return defaultValue;
+  }
+  const normalized = raw.toLowerCase();
+  if (!(PINO_LOG_LEVELS as readonly string[]).includes(normalized)) {
+    const allowed = PINO_LOG_LEVELS.join(', ');
+    throw new Error(`Invalid log level for ${key}: ${raw}. Expected one of: ${allowed}`);
+  }
+  return normalized as PinoLogLevelString;
 }
 
 function collectMissingRequiredKeys(): RequiredEnvKey[] {
@@ -80,6 +119,7 @@ function buildConfig(): ClinicHubConfig {
     screenshotDir: readOptionalString('SCREENSHOT_DIR', './screenshots'),
     logDir: readOptionalString('LOG_DIR', './logs'),
     sessionStatePath: readOptionalString('SESSION_STATE_PATH', './recordings/auth.json'),
+    logLevel: parseLogLevel('LOG_LEVEL', 'info'),
     thirdPartyUrl: readTrimmed('THIRD_PARTY_URL')!,
     thirdPartyUsername: readTrimmed('THIRD_PARTY_USERNAME')!,
     thirdPartyPassword: readTrimmed('THIRD_PARTY_PASSWORD')!,
@@ -88,24 +128,6 @@ function buildConfig(): ClinicHubConfig {
     webmailPassword: readTrimmed('WEBMAIL_PASSWORD')!,
     testEmailRecipient: readTrimmed('TEST_EMAIL_RECIPIENT')!,
   };
-}
-
-export interface ClinicHubConfig {
-  dryRun: boolean;
-  stepMode: boolean;
-  browserHeadless: boolean;
-  supervisedMode: boolean;
-  slowMoMs: number;
-  screenshotDir: string;
-  logDir: string;
-  sessionStatePath: string;
-  thirdPartyUrl: string;
-  thirdPartyUsername: string;
-  thirdPartyPassword: string;
-  webmailUrl: string;
-  webmailUsername: string;
-  webmailPassword: string;
-  testEmailRecipient: string;
 }
 
 export const config: ClinicHubConfig = buildConfig();
