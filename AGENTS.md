@@ -25,7 +25,7 @@ One doctor, one machine, TypeScript + Playwright, no infrastructure.
 | `docs/ARCHITECTURE.md` | Tech stack decisions, layer design, security model | Before making any structural decisions |
 | `docs/PHASE_1.md` | Phase 1 directory layout, env vars, code-level flow | Before writing any Phase 1 code |
 | `docs/STORIES.md` | Story backlog, AC, dependency graph, status table | Before starting any story |
-| `docs/AGENT_PROMPT_TEMPLATE.md` | How to dispatch sub-agents (Top Agent use only) | When dispatching an implementation agent |
+| `docs/AGENT_PROMPT_TEMPLATE.md` | How to dispatch sub-agents (Top Agent use only); PR 修复派遣须含 **Overall score 0–100** | When dispatching an implementation agent or a PR-fix pass |
 
 ---
 
@@ -111,5 +111,5 @@ If an implementation agent encounters an architectural ambiguity, it must **stop
 
 ---
 
-*Last updated: 2026-04-15*
+*Last updated: 2026-04-17*
 *Maintained by: Top Agent*
