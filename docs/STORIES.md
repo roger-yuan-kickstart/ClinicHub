@@ -33,7 +33,7 @@
 
 ### STORY-001 — 项目脚手架与基础配置
 
-**状态：** `[x]`
+**状态：** `[~]`
 
 **As a** developer setting up the project for the first time,
 **I want** a properly initialized TypeScript project with all configuration files and linting rules in place,
@@ -549,7 +549,7 @@ STORY-007 (浏览器初始化)
 
 | Story | 标题 | 执行者 | 状态 | 备注 |
 |---|---|---|---|---|
-| STORY-001 | 项目脚手架与基础配置 | Agent | `[x] 已完成` | 含 ESLint 配置，机器执行架构约束 |
+| STORY-001 | 项目脚手架与基础配置 | Agent | `[~] 进行中` | 含 ESLint 配置；实现见 PR，合并后改 `[x]` |
 | STORY-002 | 环境变量加载与校验 | Agent | `[ ] 待开始` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |
