@@ -30,6 +30,8 @@
 > Phase 1 禁止引入：Redis、PostgreSQL、BullMQ、Fastify、Next.js、Docker。
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
+>
+> **当前 Agent 焦点（进行中）：** **STORY-010** — 患者报告详情页 POM。STORY-009 已于 **PR #11** 合入 `main`（`PatientReportListPage.ts`、`pageUtils.ts` / `resolveThirdPartyPath`）。
 
 ---
 
@@ -271,13 +273,13 @@
 
 **Depends on:** STORY-007
 
-**交付记录：** PR #11：`PatientReportListPage.ts`；列表 URL 为 `thirdPartyUrl` + `patient-report-list` placeholder 路径；选择器待 STORY-012 替换。
+**交付记录：** PR #11 已合并至 `main`：`PatientReportListPage.ts`、`pageUtils.ts`（`resolveThirdPartyPath`）；列表 URL 为 `thirdPartyUrl` + `patient-report-list` placeholder 路径；选择器待 STORY-012 替换。
 
 ---
 
 ### STORY-010 — Page Object: 患者报告详情页
 
-**状态：** `[ ]`
+**状态：** `[~]`
 
 **As a** developer automating patient report replies,
 **I want** the report detail page logic encapsulated in a Page Object,
@@ -523,7 +525,7 @@ STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
 STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation/browser.ts`）
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
-    ├──→ STORY-010 (POM: 报告详情页)
+    ├──→ STORY-010 [~]（POM: 报告详情页；当前进行中）
     └──→ STORY-011 (POM: 邮件撰写页)
          ↓
     STORY-012a (Agent: 交互式选择器采集工具)
@@ -579,8 +581,8 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-006 | 共享类型定义 | Agent | `[x] 已完成` | PR #8 已合并；`src/types/index.ts`；`TaskConfig` / `config.ts` 对齐；Code review 跟进已合入；依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | PR #9 已合并；`browser.ts`；依赖 006 |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
-| STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | `PatientReportListPage.ts`；选择器 placeholder，待 STORY-012 |
-| STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全；**栈顶下一项（Agent）** |
+| STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
+| STORY-010 | POM: 患者报告详情页 | Agent | `[~] 进行中` | 栈顶；依赖 007，选择器待采集后补全 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
 | STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
