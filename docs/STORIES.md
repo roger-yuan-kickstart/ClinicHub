@@ -204,23 +204,25 @@
 
 ### STORY-007 — Playwright 浏览器初始化模块
 
-**状态：** `[ ]`
+**状态：** `[~] 进行中`
 
 **As a** developer launching the automation,
 **I want** a reusable function that initializes Playwright with the correct settings,
 **So that** the rest of the code doesn't need to worry about browser configuration, and every run behaves consistently.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/browser.ts` 导出 `createBrowserContext(config: TaskConfig)` 函数
-- [ ] 函数返回：`{ browser, context, page }` 对象（TypeScript 强类型）
-- [ ] 根据 `config.headless` 决定是否无头模式
-- [ ] 根据 `config.slowMo` 设置操作间隔（防封号）
-- [ ] `BrowserContext` 的 `userAgent` 设置为真实浏览器 UA（不使用 Playwright 默认值）
-- [ ] `viewport` 设置为 `1280x720`
-- [ ] 导出 `closeBrowser({ browser, context })` 函数，安全关闭所有资源
-- [ ] 浏览器启动成功/失败都有日志记录
+- [x] `src/automation/browser.ts` 导出 `createBrowserContext(config: TaskConfig)` 函数
+- [x] 函数返回：`{ browser, context, page }` 对象（TypeScript 强类型）
+- [x] 根据 `TaskConfig.browserHeadless`（环境变量 `BROWSER_HEADLESS`）决定是否无头模式（Story 原文 `config.headless` 与 STORY-006 字段名对齐）
+- [x] 根据 `TaskConfig.slowMoMs`（环境变量 `SLOW_MO_MS`）设置操作间隔（防封号；Story 原文 `config.slowMo`）
+- [x] `BrowserContext` 的 `userAgent` 设置为真实浏览器 UA（不使用 Playwright 默认值）
+- [x] `viewport` 设置为 `1280x720`
+- [x] 导出 `closeBrowser({ browser, context })` 函数，安全关闭所有资源
+- [x] 浏览器启动成功/失败都有日志记录
 
 **Depends on:** STORY-006
+
+**交付记录：** PR #9 待合入 `main`；合入后本 Story 状态改回 `[x] 已完成`。
 
 ---
 
@@ -507,7 +509,7 @@ STORY-003 (日志工具)
          ↓
 STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
     ↓
-STORY-007 (浏览器初始化) ← **栈顶下一项（Agent）**
+STORY-007 ✅（浏览器初始化；PR #9；`src/automation/browser.ts`）
     ├──→ STORY-008 (POM: 登录页，含 restoreSession / saveSession)
     ├──→ STORY-009 (POM: 报告列表页)
     ├──→ STORY-010 (POM: 报告详情页)
@@ -564,8 +566,8 @@ STORY-007 (浏览器初始化) ← **栈顶下一项（Agent）**
 | STORY-004b | Supervised UI 确认面板 | Agent | `[x] 已完成` | `supervisedUI.ts` + `dryRun` 集成；`SUPERVISED_UI_PORT` 默认 7788 |
 | STORY-005 | 截图工具模块 | Agent | `[x] 已完成` | PR #7 已合并；`screenshot.ts`（`fullPage` + 结构化 info 日志）；依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[x] 已完成` | PR #8 已合并；`src/types/index.ts`；`TaskConfig` / `config.ts` 对齐；Code review 跟进已合入；依赖 002 |
-| STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006；**栈顶下一项（Agent）** |
-| STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 新增 restoreSession / saveSession；依赖 007 |
+| STORY-007 | Playwright 浏览器初始化 | Agent | `[~] 进行中` | PR #9 待合入 `main`；`browser.ts`；依赖 006 |
+| STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 新增 restoreSession / saveSession；依赖 007；**栈顶下一项（Agent）** |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
@@ -576,7 +578,7 @@ STORY-007 (浏览器初始化) ← **栈顶下一项（Agent）**
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 6 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 6 / 18 完成（STORY-007 PR 合入后回 7 / 18）&nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
