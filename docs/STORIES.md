@@ -132,7 +132,7 @@
 
 ### STORY-004b — Supervised UI 确认面板
 
-**状态：** `[ ]`
+**状态：** `[x] 已完成`
 
 > **开工条件：** STORY-004 已合入 `main` 后即可启动本 Story（Dry-Run 中间件与 `dryRun.ts` 扩展点已就绪）。
 
@@ -141,19 +141,19 @@
 **So that** I can visually verify each step and click "Confirm" before the automation proceeds, eliminating the risk of executing wrong actions on the real system.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/supervisedUI.ts` 导出 `SupervisedUI` 类，包含 `start()`、`stop()`、`requestConfirmation(step)` 三个方法
-- [ ] `start()` 在本地启动一个轻量 HTTP 服务（默认端口 `7788`），服务静态 HTML 确认面板
-- [ ] `requestConfirmation(step)` 接收以下结构，并在面板上展示：
+- [x] `src/automation/supervisedUI.ts` 导出 `SupervisedUI` 类，包含 `start()`、`stop()`、`requestConfirmation(step)` 三个方法
+- [x] `start()` 在本地启动一个轻量 HTTP 服务（默认端口 `7788`），服务静态 HTML 确认面板
+- [x] `requestConfirmation(step)` 接收以下结构，并在面板上展示：
   - `description: string` — 操作描述（例："点击「保存回复」按钮"）
   - `screenshotBase64: string` — 操作前当前页面截图（base64 PNG）
   - `targetRect?: { x, y, width, height }` — 即将操作的元素在截图上的坐标，面板用红框标注
   - `windowLabel?: string` — 当前操作的窗口名称（例："ThirdParty" 或 "Webmail"）
-- [ ] 面板显示两个按钮：**Confirm（确认执行）** 和 **Skip（跳过此步）**
-- [ ] `requestConfirmation` 返回 `Promise<'confirm' | 'skip'>`，等待用户在面板点击后 resolve
-- [ ] `SUPERVISED_MODE=false` 时，`requestConfirmation` 直接返回 `'confirm'`，不启动 HTTP 服务（零开销）
-- [ ] `dryRun.ts` 的 `safeClick` 和 `safeFill` 在 `SUPERVISED_MODE=true` 时，操作前自动调用 `requestConfirmation`
-- [ ] 面板 HTML 极简：截图显示区（带红框标注）+ 操作描述文字 + 两个按钮；不引入任何前端框架
-- [ ] `stop()` 安全关闭 HTTP 服务，在 `runner.ts` 的 `finally` 块中调用
+- [x] 面板显示两个按钮：**Confirm（确认执行）** 和 **Skip（跳过此步）**
+- [x] `requestConfirmation` 返回 `Promise<'confirm' | 'skip'>`，等待用户在面板点击后 resolve
+- [x] `SUPERVISED_MODE=false` 时，`requestConfirmation` 直接返回 `'confirm'`，不启动 HTTP 服务（零开销）
+- [x] `dryRun.ts` 的 `safeClick` 和 `safeFill` 在 `SUPERVISED_MODE=true` 时，操作前自动调用 `requestConfirmation`
+- [x] 面板 HTML 极简：截图显示区（带红框标注）+ 操作描述文字 + 两个按钮；不引入任何前端框架
+- [x] `stop()` 安全关闭 HTTP 服务，在 `runner.ts` 的 `finally` 块中调用
 
 **Depends on:** STORY-004
 
@@ -559,7 +559,7 @@ STORY-007 (浏览器初始化)
 | STORY-002 | 环境变量加载与校验 | Agent | `[x] 已完成` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[x] 已完成` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[x] 已完成` | `src/automation/dryRun.ts`；依赖 003；**下一步 → 004b** |
-| STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 004 已就绪，PR 合入 `main` 后可开工；本地 HTTP 面板 + 截图高亮 |
+| STORY-004b | Supervised UI 确认面板 | Agent | `[x] 已完成` | `supervisedUI.ts` + `dryRun` 集成；`SUPERVISED_UI_PORT` 默认 7788 |
 | STORY-005 | 截图工具模块 | Agent | `[ ] 待开始` | 依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006 |
