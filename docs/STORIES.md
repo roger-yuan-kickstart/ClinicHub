@@ -126,11 +126,15 @@
 
 **Depends on:** STORY-003
 
+**交付与后续：** 实现已通过审查，相关 PR 合并入 `main` 后即可关闭本 Story 的交付。**接下来**请开始 **STORY-004b**（Supervised UI 确认面板）；STORY-004 为其唯一硬依赖，合并后无阻塞。
+
 ---
 
 ### STORY-004b — Supervised UI 确认面板
 
 **状态：** `[ ]`
+
+> **开工条件：** STORY-004 已合入 `main` 后即可启动本 Story（Dry-Run 中间件与 `dryRun.ts` 扩展点已就绪）。
 
 **As a** developer running automation against a live production system,
 **I want** a local web UI panel that shows me exactly what action is about to be executed—with a screenshot and element highlight—before it happens,
@@ -554,8 +558,8 @@ STORY-007 (浏览器初始化)
 | STORY-001 | 项目脚手架与基础配置 | Agent | `[x] 已完成` | 含 ESLint 配置；`recordings/` 整目录 gitignore |
 | STORY-002 | 环境变量加载与校验 | Agent | `[x] 已完成` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[x] 已完成` | 依赖 002 |
-| STORY-004 | Dry-Run 安全机制 | Agent | `[x] 已完成` | `src/automation/dryRun.ts`；依赖 003 |
-| STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 本地 HTTP 面板，截图高亮 + 人工确认；依赖 004 |
+| STORY-004 | Dry-Run 安全机制 | Agent | `[x] 已完成` | `src/automation/dryRun.ts`；依赖 003；**下一步 → 004b** |
+| STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 004 已就绪，PR 合入 `main` 后可开工；本地 HTTP 面板 + 截图高亮 |
 | STORY-005 | 截图工具模块 | Agent | `[ ] 待开始` | 依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006 |
