@@ -30,6 +30,8 @@
 > Phase 1 禁止引入：Redis、PostgreSQL、BullMQ、Fastify、Next.js、Docker。
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
+>
+> **当前 Agent 焦点（进行中）：** **STORY-010** — 患者报告详情页 POM。STORY-009 已于 **PR #11** 合入 `main`（`PatientReportListPage.ts`、`pageUtils.ts` / `resolveThirdPartyPath`）。
 
 ---
 
@@ -255,27 +257,29 @@
 
 ### STORY-009 — Page Object: 患者报告列表页
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer automating patient report processing,
 **I want** the report list page logic encapsulated in a Page Object,
 **So that** fetching the list of pending reports is a single method call with a typed return value.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/pages/PatientReportListPage.ts` 导出 `PatientReportListPage` 类
-- [ ] `navigate()` 方法：导航到报告列表页（已登录状态下）
-- [ ] `getReportList()` 方法：返回 `PatientReport[]`，包含页面上所有待处理报告的基础信息（`id`、`patientId`）
-- [ ] 列表为空时返回空数组，日志打印 "未找到待处理报告"，不抛出异常
-- [ ] 所有选择器定义为类的 `private readonly` 属性
-- [ ] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
+- [x] `src/automation/pages/PatientReportListPage.ts` 导出 `PatientReportListPage` 类
+- [x] `navigate()` 方法：导航到报告列表页（已登录状态下）
+- [x] `getReportList()` 方法：返回 `PatientReport[]`，包含页面上所有待处理报告的基础信息（`id`、`patientId`）
+- [x] 列表为空时返回空数组，日志打印 "未找到待处理报告"，不抛出异常（代码与 ESLint 要求：英文日志 `No pending reports found on the patient report list page`）
+- [x] 所有选择器定义为类的 `private readonly` 属性
+- [x] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
 
 **Depends on:** STORY-007
+
+**交付记录：** PR #11 已合并至 `main`：`PatientReportListPage.ts`、`pageUtils.ts`（`resolveThirdPartyPath`）；列表 URL 为 `thirdPartyUrl` + `patient-report-list` placeholder 路径；选择器待 STORY-012 替换。
 
 ---
 
 ### STORY-010 — Page Object: 患者报告详情页
 
-**状态：** `[ ]`
+**状态：** `[~]`
 
 **As a** developer automating patient report replies,
 **I want** the report detail page logic encapsulated in a Page Object,
@@ -520,8 +524,8 @@ STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
     ↓
 STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation/browser.ts`）
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
-    ├──→ STORY-009 (POM: 报告列表页)
-    ├──→ STORY-010 (POM: 报告详情页)
+    ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
+    ├──→ STORY-010 [~]（POM: 报告详情页；当前进行中）
     └──→ STORY-011 (POM: 邮件撰写页)
          ↓
     STORY-012a (Agent: 交互式选择器采集工具)
@@ -577,8 +581,8 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-006 | 共享类型定义 | Agent | `[x] 已完成` | PR #8 已合并；`src/types/index.ts`；`TaskConfig` / `config.ts` 对齐；Code review 跟进已合入；依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | PR #9 已合并；`browser.ts`；依赖 006 |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
-| STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全；**栈顶下一项（Agent）** |
-| STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
+| STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
+| STORY-010 | POM: 患者报告详情页 | Agent | `[~] 进行中` | 栈顶；依赖 007，选择器待采集后补全 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
 | STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
@@ -587,10 +591,10 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 8 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 9 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
-*最后更新：2026-04-17*
+*最后更新：2026-04-18*
 *文档维护：Top Agent（架构决策 & Story 设计）*
 *执行：Implementation Agent（Story 级别逐一完成）*
