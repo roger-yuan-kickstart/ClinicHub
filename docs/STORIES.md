@@ -110,19 +110,19 @@
 
 ### STORY-004 — Dry-Run 安全机制
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer testing against the production environment,
 **I want** all write operations to be intercepted and logged instead of executed when `DRY_RUN=true`,
 **So that** I can safely run the full automation flow against the real system without accidentally submitting or sending anything.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/dryRun.ts` 导出：`safeClick`、`safeFill`、`confirmAction` 三个函数
-- [ ] `DRY_RUN=true` 时，`safeClick` 和 `safeFill` 只打日志，不执行任何 Playwright 操作
-- [ ] `DRY_RUN=true` 时，`confirmAction` 直接返回 `false`（跳过人工确认步骤）
-- [ ] `DRY_RUN=false` 时，`confirmAction` 在控制台打印操作描述，等待用户输入 `yes` 才继续；输入其他任何内容则跳过
-- [ ] `STEP_MODE=true` 时，即使 `DRY_RUN=false`，每个 `safeClick` 和 `safeFill` 操作前也先调用 `confirmAction` 确认
-- [ ] 所有 Dry-Run 日志带有 `[DRY-RUN]` 前缀，便于日志过滤
+- [x] `src/automation/dryRun.ts` 导出：`safeClick`、`safeFill`、`confirmAction` 三个函数
+- [x] `DRY_RUN=true` 时，`safeClick` 和 `safeFill` 只打日志，不执行任何 Playwright 操作
+- [x] `DRY_RUN=true` 时，`confirmAction` 直接返回 `false`（跳过人工确认步骤）
+- [x] `DRY_RUN=false` 时，`confirmAction` 在控制台打印操作描述，等待用户输入 `yes` 才继续；输入其他任何内容则跳过
+- [x] `STEP_MODE=true` 时，即使 `DRY_RUN=false`，每个 `safeClick` 和 `safeFill` 操作前也先调用 `confirmAction` 确认
+- [x] 所有 Dry-Run 日志带有 `[DRY-RUN]` 前缀，便于日志过滤
 
 **Depends on:** STORY-003
 
@@ -554,7 +554,7 @@ STORY-007 (浏览器初始化)
 | STORY-001 | 项目脚手架与基础配置 | Agent | `[x] 已完成` | 含 ESLint 配置；`recordings/` 整目录 gitignore |
 | STORY-002 | 环境变量加载与校验 | Agent | `[x] 已完成` | 新增 SESSION_STATE_PATH / SUPERVISED_MODE |
 | STORY-003 | 统一日志工具 | Agent | `[x] 已完成` | 依赖 002 |
-| STORY-004 | Dry-Run 安全机制 | Agent | `[ ] 待开始` | 依赖 003 |
+| STORY-004 | Dry-Run 安全机制 | Agent | `[x] 已完成` | `src/automation/dryRun.ts`；依赖 003 |
 | STORY-004b | Supervised UI 确认面板 | Agent | `[ ] 待开始` | 本地 HTTP 面板，截图高亮 + 人工确认；依赖 004 |
 | STORY-005 | 截图工具模块 | Agent | `[ ] 待开始` | 依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[ ] 待开始` | 依赖 002 |
@@ -570,7 +570,7 @@ STORY-007 (浏览器初始化)
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 3 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 4 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
