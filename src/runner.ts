@@ -1,4 +1,5 @@
 import { SupervisedUI, registerSupervisedUi } from './automation/supervisedUI';
+import { config } from './config';
 import { logger } from './logger';
 
 async function main(): Promise<void> {
@@ -11,6 +12,17 @@ async function main(): Promise<void> {
   try {
     await supervisedUi.start();
     logger.info('ClinicHub runner started');
+    if (config.supervisedMode && config.supervisedUiSmokeHoldMs > 0) {
+      logger.info(
+        { ms: config.supervisedUiSmokeHoldMs },
+        'Supervised UI smoke hold: keeping local panel server open; open http://127.0.0.1:' +
+          String(config.supervisedUiPort) +
+          ' in a browser (set SUPERVISED_UI_SMOKE_HOLD_MS=0 to skip)',
+      );
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, config.supervisedUiSmokeHoldMs);
+      });
+    }
   } finally {
     await supervisedUi.stop();
     registerSupervisedUi(null);

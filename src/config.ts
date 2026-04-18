@@ -23,6 +23,8 @@ export interface ClinicHubConfig {
   browserHeadless: boolean;
   supervisedMode: boolean;
   supervisedUiPort: number;
+  /** When > 0 and supervised mode is on, runner waits this long before shutdown (preview panel). */
+  supervisedUiSmokeHoldMs: number;
   slowMoMs: number;
   screenshotDir: string;
   logDir: string;
@@ -133,6 +135,7 @@ function buildConfig(): ClinicHubConfig {
     browserHeadless: parseBooleanEnv('BROWSER_HEADLESS', false),
     supervisedMode: parseBooleanEnv('SUPERVISED_MODE', false),
     supervisedUiPort: parsePort('SUPERVISED_UI_PORT', 7788),
+    supervisedUiSmokeHoldMs: parseNonNegativeInt('SUPERVISED_UI_SMOKE_HOLD_MS', 0),
     slowMoMs: parseNonNegativeInt('SLOW_MO_MS', 500),
     screenshotDir: readOptionalString('SCREENSHOT_DIR', './screenshots'),
     logDir: readOptionalString('LOG_DIR', './logs'),
