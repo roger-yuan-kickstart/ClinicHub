@@ -48,6 +48,7 @@ async function supervisedConfirmBeforeWrite(
   page: Page,
   selector: string,
   description: string,
+  windowLabel?: string,
 ): Promise<boolean> {
   if (!config.supervisedMode) {
     return true;
@@ -83,6 +84,7 @@ async function supervisedConfirmBeforeWrite(
     description,
     screenshotBase64,
     targetRect,
+    windowLabel,
   });
 
   return decision === 'confirm';
@@ -90,14 +92,20 @@ async function supervisedConfirmBeforeWrite(
 
 /**
  * Clicks an element when not in dry-run. Respects STEP_MODE (prompt before each write).
+ * @param windowLabel Optional label for the supervised UI panel (e.g. target browser context name).
  */
-export async function safeClick(page: Page, selector: string, description: string): Promise<void> {
+export async function safeClick(
+  page: Page,
+  selector: string,
+  description: string,
+  windowLabel?: string,
+): Promise<void> {
   if (config.dryRun) {
     logDryRun(`Skip click: ${description} (selector: ${selector})`);
     return;
   }
 
-  const supervisedOk = await supervisedConfirmBeforeWrite(page, selector, description);
+  const supervisedOk = await supervisedConfirmBeforeWrite(page, selector, description, windowLabel);
   if (!supervisedOk) {
     logger.info(`Skipped by user (supervised UI): ${description}`);
     return;
@@ -115,19 +123,21 @@ export async function safeClick(page: Page, selector: string, description: strin
 
 /**
  * Fills an input when not in dry-run. Respects STEP_MODE (prompt before each write).
+ * @param windowLabel Optional label for the supervised UI panel (e.g. target browser context name).
  */
 export async function safeFill(
   page: Page,
   selector: string,
   value: string,
   description: string,
+  windowLabel?: string,
 ): Promise<void> {
   if (config.dryRun) {
     logDryRun(`Skip fill: ${description} (selector: ${selector}, value: [REDACTED])`);
     return;
   }
 
-  const supervisedOk = await supervisedConfirmBeforeWrite(page, selector, description);
+  const supervisedOk = await supervisedConfirmBeforeWrite(page, selector, description, windowLabel);
   if (!supervisedOk) {
     logger.info(`Skipped by user (supervised UI): ${description}`);
     return;

@@ -9,7 +9,17 @@ export interface SupervisedConfirmationStep {
   windowLabel?: string;
 }
 
+/** POST /api/decision bodies are tiny; cap defends against buggy or hostile local clients. */
+const MAX_JSON_BODY_BYTES = 65536;
+
 let registeredInstance: SupervisedUI | null = null;
+
+class JsonBodyTooLargeError extends Error {
+  constructor() {
+    super('JSON body exceeds size limit');
+    this.name = 'JsonBodyTooLargeError';
+  }
+}
 
 export function registerSupervisedUi(ui: SupervisedUI | null): void {
   registeredInstance = ui;
@@ -62,10 +72,11 @@ const PANEL_HTML = `<!DOCTYPE html>
       var windowLabelEl = document.getElementById('windowLabel');
       var confirmBtn = document.getElementById('confirmBtn');
       var skipBtn = document.getElementById('skipBtn');
+      var currentTargetRect = null;
 
       function layoutHighlight() {
         if (!highlight || highlight.style.display === 'none' || !shot || !shot.naturalWidth) return;
-        var rect = shot._targetRect;
+        var rect = currentTargetRect;
         if (!rect) return;
         var scale = shot.clientWidth / shot.naturalWidth;
         highlight.style.left = (rect.x * scale) + 'px';
@@ -83,7 +94,8 @@ const PANEL_HTML = `<!DOCTYPE html>
         if (!step) {
           if (waiting) waiting.style.display = '';
           if (actions) actions.style.display = 'none';
-          if (shot) { shot.removeAttribute('src'); shot._targetRect = null; }
+          if (shot) { shot.removeAttribute('src'); }
+          currentTargetRect = null;
           if (highlight) highlight.style.display = 'none';
           if (windowLabelEl) { windowLabelEl.style.display = 'none'; windowLabelEl.textContent = ''; }
           desc.innerHTML = '';
@@ -103,7 +115,7 @@ const PANEL_HTML = `<!DOCTYPE html>
           }
         }
         if (shot) {
-          shot._targetRect = step.targetRect || null;
+          currentTargetRect = step.targetRect || null;
           shot.src = 'data:image/png;base64,' + (step.screenshotBase64 || '');
         }
         if (highlight && step.targetRect) {
@@ -148,26 +160,61 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(payload);
 }
 
-function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+function readJsonBody(req: IncomingMessage, maxBytes: number): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
+    let totalLength = 0;
+    let settled = false;
+
+    const settleReject = (reason: unknown): void => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      reject(reason);
+    };
+
+    const settleResolve = (value: Record<string, unknown>): void => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(value);
+    };
+
     req.on('data', (chunk: Buffer) => {
+      if (settled) {
+        return;
+      }
+      totalLength += chunk.length;
+      if (totalLength > maxBytes) {
+        req.destroy();
+        settleReject(new JsonBodyTooLargeError());
+        return;
+      }
       chunks.push(chunk);
     });
     req.on('end', () => {
+      if (settled) {
+        return;
+      }
       try {
         const raw = Buffer.concat(chunks).toString('utf8');
         if (raw.trim() === '') {
-          resolve({});
+          settleResolve({});
           return;
         }
         const parsed: unknown = JSON.parse(raw);
-        resolve(typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {});
+        settleResolve(
+          typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
+            ? (parsed as Record<string, unknown>)
+            : {},
+        );
       } catch (err) {
-        reject(err);
+        settleReject(err);
       }
     });
-    req.on('error', reject);
+    req.on('error', settleReject);
   });
 }
 
@@ -281,7 +328,7 @@ export class SupervisedUI {
       }
 
       if (method === 'POST' && url === '/api/decision') {
-        const body = await readJsonBody(req);
+        const body = await readJsonBody(req, MAX_JSON_BODY_BYTES);
         const choice = body.choice;
         if (choice !== 'confirm' && choice !== 'skip') {
           sendJson(res, 400, { error: 'Invalid choice' });
@@ -305,6 +352,10 @@ export class SupervisedUI {
       res.writeHead(404);
       res.end();
     } catch (err) {
+      if (err instanceof JsonBodyTooLargeError) {
+        sendJson(res, 413, { error: 'Request body too large' });
+        return;
+      }
       logger.warn({ err }, 'Supervised UI HTTP handler error');
       sendJson(res, 500, { error: 'Internal error' });
     }
