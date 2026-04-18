@@ -389,6 +389,12 @@
 - [ ] `./recordings/SELECTORS.md` 包含所有 Session 采集的完整选择器表格
 - [ ] 将 `SELECTORS.md` 中的选择器同步更新到 STORY-008 ~ STORY-011 的 Page Object 中
 - [ ] 删除所有 Page Object 中的 `placeholder` 注释
+- [ ] 回顾并更新 `src/types/index.ts` 中所有 DTO 定义，确保与真实系统数据一一对应：
+  - `PatientReport`：字段与第三方系统实际暴露的报告数据对齐（删除不存在的字段，补充采集到的新字段）
+  - `TaskConfig`：校验各配置项是否仍与 `config.ts` 及真实运行需求吻合
+  - `TaskResult`：校验结果字段是否足够覆盖 STORY-013 工作流的输出
+  - `StepContext`：校验组合对象的成员是否与各 Page Object 的实际参数需求一致
+  - 确保 `pnpm typecheck` 与 `pnpm lint` 均通过
 
 **Depends on:** STORY-012a, STORY-008, STORY-009, STORY-010, STORY-011
 
