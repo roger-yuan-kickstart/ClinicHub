@@ -181,22 +181,24 @@
 
 ### STORY-006 — 共享类型定义
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer reading or writing automation code,
 **I want** all shared data structures to be defined in one place with TypeScript types,
 **So that** every part of the codebase speaks the same language and I catch data shape errors at compile time, not runtime.
 
 **Acceptance Criteria:**
-- [ ] `src/types/index.ts` 包含以下类型定义：
+- [x] `src/types/index.ts` 包含以下类型定义：
   - `TaskConfig`：包含所有运行时配置（credentials、模式开关、路径等）
   - `PatientReport`：患者报告的数据结构（`id`、`patientId`、`reportContent`、`replyContent` 等字段）
   - `TaskResult`：任务执行结果（`success: boolean`、`processedCount: number`、`errors: string[]`）
   - `StepContext`：包含 `page`、`config`、`logger` 的组合对象，方便传参
-- [ ] 所有类型通过 `export` 导出，其他模块从 `../types` 统一导入
-- [ ] 没有 `any` 类型
+- [x] 所有类型通过 `export` 导出，其他模块从 `../types` 统一导入
+- [x] 没有 `any` 类型
 
 **Depends on:** STORY-002
+
+**交付记录：** PR #8 已合并至 `main`。
 
 ---
 
@@ -501,11 +503,11 @@ STORY-003 (日志工具)
     ├──→ STORY-004 (Dry-Run 机制)
     │        ↓
     │    STORY-004b (Supervised UI 确认面板)
-    └──→ STORY-005 ✅（截图工具，PR 已合并）
+    └──→     STORY-005 ✅（截图工具，PR 已合并）
          ↓
-STORY-006（类型定义）← **栈顶下一项（Agent）**
+STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
     ↓
-STORY-007 (浏览器初始化)
+STORY-007 (浏览器初始化) ← **栈顶下一项（Agent）**
     ├──→ STORY-008 (POM: 登录页，含 restoreSession / saveSession)
     ├──→ STORY-009 (POM: 报告列表页)
     ├──→ STORY-010 (POM: 报告详情页)
@@ -560,9 +562,9 @@ STORY-007 (浏览器初始化)
 | STORY-003 | 统一日志工具 | Agent | `[x] 已完成` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[x] 已完成` | `src/automation/dryRun.ts`；依赖 003；004b 已完成 |
 | STORY-004b | Supervised UI 确认面板 | Agent | `[x] 已完成` | `supervisedUI.ts` + `dryRun` 集成；`SUPERVISED_UI_PORT` 默认 7788 |
-| STORY-005 | 截图工具模块 | Agent | `[x] 已完成` | PR #7 已合并；`screenshot.ts`（`fullPage` + 结构化 info 日志）；依赖 003；**下一步 → 006** |
-| STORY-006 | 共享类型定义 | Agent | `[ ] 待开始` | 依赖 002；与 005 无硬依赖，执行顺序上为栈顶下一项 |
-| STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006 |
+| STORY-005 | 截图工具模块 | Agent | `[x] 已完成` | PR #7 已合并；`screenshot.ts`（`fullPage` + 结构化 info 日志）；依赖 003 |
+| STORY-006 | 共享类型定义 | Agent | `[x] 已完成` | PR #8 已合并；`src/types/index.ts`；`TaskConfig` / `config.ts` 对齐；Code review 跟进已合入；依赖 002 |
+| STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006；**栈顶下一项（Agent）** |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 新增 restoreSession / saveSession；依赖 007 |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
@@ -574,10 +576,10 @@ STORY-007 (浏览器初始化)
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 5 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 6 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
-*最后更新：2026-04-17*
+*最后更新：2026-04-18*
 *文档维护：Top Agent（架构决策 & Story 设计）*
 *执行：Implementation Agent（Story 级别逐一完成）*

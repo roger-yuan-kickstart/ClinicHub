@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import type { PinoLogLevelString, TaskConfig } from './types';
 
 dotenv.config();
 
@@ -12,32 +13,18 @@ const REQUIRED_ENV_KEYS = [
   'TEST_EMAIL_RECIPIENT',
 ] as const;
 
-const PINO_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
+const PINO_LOG_LEVELS: readonly PinoLogLevelString[] = [
+  'trace',
+  'debug',
+  'info',
+  'warn',
+  'error',
+  'fatal',
+];
 
 type RequiredEnvKey = (typeof REQUIRED_ENV_KEYS)[number];
-type PinoLogLevelString = (typeof PINO_LOG_LEVELS)[number];
 
-export interface ClinicHubConfig {
-  dryRun: boolean;
-  stepMode: boolean;
-  browserHeadless: boolean;
-  supervisedMode: boolean;
-  supervisedUiPort: number;
-  /** When > 0 and supervised mode is on, runner waits this long before shutdown (preview panel). */
-  supervisedUiSmokeHoldMs: number;
-  slowMoMs: number;
-  screenshotDir: string;
-  logDir: string;
-  sessionStatePath: string;
-  logLevel: PinoLogLevelString;
-  thirdPartyUrl: string;
-  thirdPartyUsername: string;
-  thirdPartyPassword: string;
-  webmailUrl: string;
-  webmailUsername: string;
-  webmailPassword: string;
-  testEmailRecipient: string;
-}
+export type ClinicHubConfig = TaskConfig;
 
 function readTrimmed(key: string): string | undefined {
   const value = process.env[key];
@@ -105,11 +92,13 @@ function parseLogLevel(key: string, defaultValue: PinoLogLevelString): PinoLogLe
     return defaultValue;
   }
   const normalized = raw.toLowerCase();
-  if (!(PINO_LOG_LEVELS as readonly string[]).includes(normalized)) {
-    const allowed = PINO_LOG_LEVELS.join(', ');
-    throw new Error(`Invalid log level for ${key}: ${raw}. Expected one of: ${allowed}`);
+  for (const level of PINO_LOG_LEVELS) {
+    if (level === normalized) {
+      return level;
+    }
   }
-  return normalized as PinoLogLevelString;
+  const allowed = PINO_LOG_LEVELS.join(', ');
+  throw new Error(`Invalid log level for ${key}: ${raw}. Expected one of: ${allowed}`);
 }
 
 function collectMissingRequiredKeys(): RequiredEnvKey[] {
@@ -122,7 +111,7 @@ function collectMissingRequiredKeys(): RequiredEnvKey[] {
   return missing;
 }
 
-function buildConfig(): ClinicHubConfig {
+function buildConfig(): TaskConfig {
   const missing = collectMissingRequiredKeys();
   if (missing.length > 0) {
     const sorted = [...missing].sort().join(', ');
