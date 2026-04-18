@@ -44,7 +44,10 @@ export class ThirdPartyLoginPage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto(this.config.thirdPartyUrl, { waitUntil: 'load' });
+    const { thirdPartyUrl } = this.config;
+    logger.info({ thirdPartyUrl }, 'Navigating to third-party system');
+    await this.page.goto(thirdPartyUrl, { waitUntil: 'load' });
+    logger.info({ thirdPartyUrl }, 'Third-party entry page load finished');
   }
 
   /**
@@ -59,6 +62,10 @@ export class ThirdPartyLoginPage {
       );
     }
     await this.navigate();
+    logger.info(
+      { sessionStatePath: absolute, thirdPartyUrl: this.config.thirdPartyUrl },
+      'Session state file present; third-party entry page loaded for login probe',
+    );
   }
 
   async saveSession(path: string): Promise<void> {
