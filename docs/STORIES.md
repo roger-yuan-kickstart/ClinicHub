@@ -228,26 +228,28 @@
 
 ### STORY-008 — Page Object: 第三方系统登录页
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer automating the clinic workflow,
 **I want** the third-party system login logic encapsulated in a Page Object that supports both fresh login and reusing a saved Playwright storage state on the next launch,
 **So that** daily runs skip interactive login when `browser.newContext({ storageState })` is used with a valid file, and only fall back to `loginFresh` when the session has expired.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/pages/ThirdPartyLoginPage.ts` 导出 `ThirdPartyLoginPage` 类
-- [ ] 构造函数接收 `page: Page`、`context: BrowserContext`、`config: TaskConfig`（`navigate` 使用 `config.thirdPartyUrl`；默认 Session 文件路径与 `config.sessionStatePath` / 环境变量 `SESSION_STATE_PATH` 对齐）
-- [ ] `navigate()` 方法：导航到 `config.thirdPartyUrl`（`THIRD_PARTY_URL`），等待页面加载完成
-- [ ] `loginFresh(username, password)` 方法：通过 `safeFill` / `safeClick`（`src/automation/dryRun.ts`）填写用户名、密码并点击登录；等待登录成功（首次建立 Session 或 Session 失效后使用）
-- [ ] `saveSession(path: string)` 方法：调用 `await context.storageState({ path })` 将 Cookie / Local Storage 等写入文件；日志打印保存路径（不记录密码）
-- [ ] `restoreSession(path: string)` 方法：**不得**声称「向已创建的 `BrowserContext` 注入 storage」——Playwright 只支持在 `browser.newContext({ storageState: path })` 时加载已保存状态。本方法职责：(1) 校验 `path` 存在且可读，否则抛出描述性 `Error`（提示先 `loginFresh` + `saveSession`，或完成 STORY-012 Session 0）；(2) 在**假定当前 `context` 已用该 `path` 作为 `storageState` 创建**的前提下，导航到第三方入口并完成加载等待，供后续 `isLoggedIn()` 判断
-- [ ] 扩展 `src/automation/browser.ts` 的 `createBrowserContext(config: TaskConfig)`：若 `config.sessionStatePath` 指向的文件存在，则 `browser.newContext` 合并传入 `storageState: config.sessionStatePath`（与现有 UA、viewport、`slowMo` 等一致）；文件不存在时保持与当前 STORY-007 行为一致
-- [ ] `isLoggedIn()` 方法：检查当前页面是否存在登录后才出现的特征元素，返回 `boolean`（用于 Session 失效检测）
-- [ ] 登录失败时（超时或出现错误提示）抛出描述性 `Error`，包含失败原因
-- [ ] 所有选择器定义为类的 `private readonly` 属性（集中管理，禁止硬编码在方法中）
-- [ ] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
+- [x] `src/automation/pages/ThirdPartyLoginPage.ts` 导出 `ThirdPartyLoginPage` 类
+- [x] 构造函数接收 `page: Page`、`context: BrowserContext`、`config: TaskConfig`（`navigate` 使用 `config.thirdPartyUrl`；默认 Session 文件路径与 `config.sessionStatePath` / 环境变量 `SESSION_STATE_PATH` 对齐）
+- [x] `navigate()` 方法：导航到 `config.thirdPartyUrl`（`THIRD_PARTY_URL`），等待页面加载完成
+- [x] `loginFresh(username, password)` 方法：通过 `safeFill` / `safeClick`（`src/automation/dryRun.ts`）填写用户名、密码并点击登录；等待登录成功（首次建立 Session 或 Session 失效后使用）
+- [x] `saveSession(path: string)` 方法：调用 `await context.storageState({ path })` 将 Cookie / Local Storage 等写入文件；日志打印保存路径（不记录密码）
+- [x] `restoreSession(path: string)` 方法：**不得**声称「向已创建的 `BrowserContext` 注入 storage」——Playwright 只支持在 `browser.newContext({ storageState: path })` 时加载已保存状态。本方法职责：(1) 校验 `path` 存在且可读，否则抛出描述性 `Error`（提示先 `loginFresh` + `saveSession`，或完成 STORY-012 Session 0）；(2) 在**假定当前 `context` 已用该 `path` 作为 `storageState` 创建**的前提下，导航到第三方入口并完成加载等待，供后续 `isLoggedIn()` 判断
+- [x] 扩展 `src/automation/browser.ts` 的 `createBrowserContext(config: TaskConfig)`：若 `config.sessionStatePath` 指向的文件存在，则 `browser.newContext` 合并传入 `storageState: config.sessionStatePath`（与现有 UA、viewport、`slowMo` 等一致）；文件不存在时保持与当前 STORY-007 行为一致
+- [x] `isLoggedIn()` 方法：检查当前页面是否存在登录后才出现的特征元素，返回 `boolean`（用于 Session 失效检测）
+- [x] 登录失败时（超时或出现错误提示）抛出描述性 `Error`，包含失败原因
+- [x] 所有选择器定义为类的 `private readonly` 属性（集中管理，禁止硬编码在方法中）
+- [x] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
 
 **Depends on:** STORY-007
+
+**交付记录：** 实现已合入本分支审查：`ThirdPartyLoginPage.ts`、`browser.ts` 条件 `storageState`；与先前 Story 文档修订同一 PR（分支 `docs/story-008-session-restore-ac`）。
 
 ---
 
@@ -511,7 +513,7 @@ STORY-003 (日志工具)
 STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
     ↓
 STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation/browser.ts`）
-    ├──→ STORY-008 (POM: 登录页 + browser `storageState`；saveSession / restoreSession 契约)
+    ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 (POM: 报告列表页)
     ├──→ STORY-010 (POM: 报告详情页)
     └──→ STORY-011 (POM: 邮件撰写页)
@@ -568,8 +570,8 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-005 | 截图工具模块 | Agent | `[x] 已完成` | PR #7 已合并；`screenshot.ts`（`fullPage` + 结构化 info 日志）；依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[x] 已完成` | PR #8 已合并；`src/types/index.ts`；`TaskConfig` / `config.ts` 对齐；Code review 跟进已合入；依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | PR #9 已合并；`browser.ts`；依赖 006 |
-| STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | Login POM + `createBrowserContext` 条件 `storageState`；修正 Session 恢复契约；依赖 007；**栈顶下一项（Agent）** |
-| STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
+| STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
+| STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全；**栈顶下一项（Agent）** |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
@@ -579,7 +581,7 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 7 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 8 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
