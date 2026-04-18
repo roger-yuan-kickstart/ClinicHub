@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
 import { logger } from '../logger';
 import type { TaskConfig } from '../types';
@@ -34,9 +35,13 @@ export async function createBrowserContext(config: TaskConfig): Promise<Playwrig
       slowMo: config.slowMoMs,
     });
 
+    const sessionPath = config.sessionStatePath;
+    const storageStateLoaded = existsSync(sessionPath);
+
     const context = await browser.newContext({
       userAgent: CHROME_DESKTOP_USER_AGENT,
       viewport: { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT },
+      ...(storageStateLoaded ? { storageState: sessionPath } : {}),
     });
 
     const page = await context.newPage();
@@ -46,6 +51,8 @@ export async function createBrowserContext(config: TaskConfig): Promise<Playwrig
         headless: config.browserHeadless,
         slowMoMs: config.slowMoMs,
         viewport: { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT },
+        storageStateLoaded,
+        sessionStatePath: sessionPath,
       },
       'Playwright browser started successfully',
     );
