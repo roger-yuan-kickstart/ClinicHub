@@ -222,7 +222,7 @@
 
 **Depends on:** STORY-006
 
-**交付记录：** 见本 Story 对应 GitHub Pull Request（编号在 PR 合并后补入表格备注亦可）。
+**交付记录：** PR #9 已打开（合入 `main` 后可改为「已合并」表述）。
 
 ---
 
@@ -509,7 +509,7 @@ STORY-003 (日志工具)
          ↓
 STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
     ↓
-STORY-007 ✅（浏览器初始化；`src/automation/browser.ts`）
+STORY-007 ✅（浏览器初始化；PR #9；`src/automation/browser.ts`）
     ├──→ STORY-008 (POM: 登录页，含 restoreSession / saveSession)
     ├──→ STORY-009 (POM: 报告列表页)
     ├──→ STORY-010 (POM: 报告详情页)
@@ -566,7 +566,7 @@ STORY-007 ✅（浏览器初始化；`src/automation/browser.ts`）
 | STORY-004b | Supervised UI 确认面板 | Agent | `[x] 已完成` | `supervisedUI.ts` + `dryRun` 集成；`SUPERVISED_UI_PORT` 默认 7788 |
 | STORY-005 | 截图工具模块 | Agent | `[x] 已完成` | PR #7 已合并；`screenshot.ts`（`fullPage` + 结构化 info 日志）；依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[x] 已完成` | PR #8 已合并；`src/types/index.ts`；`TaskConfig` / `config.ts` 对齐；Code review 跟进已合入；依赖 002 |
-| STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | `browser.ts`：`createBrowserContext` / `closeBrowser`；依赖 006 |
+| STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | `browser.ts`；PR #9；依赖 006 |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 新增 restoreSession / saveSession；依赖 007；**栈顶下一项（Agent）** |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[ ] 待开始` | 依赖 007，选择器待采集后补全 |
