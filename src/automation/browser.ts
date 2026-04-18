@@ -4,9 +4,11 @@ import type { TaskConfig } from '../types';
 
 /**
  * Desktop Chrome UA string (not Playwright's default), to reduce automation fingerprinting.
+ * Refresh the Chrome major version over time (e.g. match local Chrome or chromestatus.com stable);
+ * do not leave a stale major version fixed indefinitely.
  */
 const CHROME_DESKTOP_USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36';
 
 const VIEWPORT_WIDTH = 1280;
 const VIEWPORT_HEIGHT = 720;
