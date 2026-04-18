@@ -38,8 +38,8 @@ export async function screenshot(page: Page, stepName: string): Promise<void> {
 
   try {
     fs.mkdirSync(dir, { recursive: true });
-    await page.screenshot({ path: filePath, type: 'png' });
-    logger.info(`Screenshot saved: ${filePath}`);
+    await page.screenshot({ path: filePath, type: 'png', fullPage: true });
+    logger.info({ filePath }, 'Screenshot saved');
   } catch (err: unknown) {
     logger.warn({ err }, 'Screenshot capture failed');
   }
