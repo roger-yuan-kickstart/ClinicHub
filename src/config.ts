@@ -92,11 +92,13 @@ function parseLogLevel(key: string, defaultValue: PinoLogLevelString): PinoLogLe
     return defaultValue;
   }
   const normalized = raw.toLowerCase();
-  if (!PINO_LOG_LEVELS.includes(normalized as PinoLogLevelString)) {
-    const allowed = PINO_LOG_LEVELS.join(', ');
-    throw new Error(`Invalid log level for ${key}: ${raw}. Expected one of: ${allowed}`);
+  for (const level of PINO_LOG_LEVELS) {
+    if (level === normalized) {
+      return level;
+    }
   }
-  return normalized as PinoLogLevelString;
+  const allowed = PINO_LOG_LEVELS.join(', ');
+  throw new Error(`Invalid log level for ${key}: ${raw}. Expected one of: ${allowed}`);
 }
 
 function collectMissingRequiredKeys(): RequiredEnvKey[] {

@@ -38,12 +38,13 @@ export interface TaskConfig {
 
 /**
  * Patient report data extracted from the third-party system (list row or detail page).
+ * `replyContent` is absent until a reply exists (list rows may omit it; use detail page to fill).
  */
 export interface PatientReport {
   id: string;
   patientId: string;
   reportContent: string;
-  replyContent: string;
+  replyContent?: string;
   patientName?: string;
   reportTitle?: string;
   status?: string;
@@ -57,7 +58,11 @@ export interface TaskResult {
   errors: string[];
 }
 
-/** Bundled dependencies passed through workflow steps and Page Objects. */
+/**
+ * Bundled dependencies passed through workflow steps and Page Objects.
+ * Phase 1 couples this to Playwright's `Page`; if non-automation code imports shared types later,
+ * split or generalize (e.g. `StepContext<TPage>`) rather than widening `../types`.
+ */
 export interface StepContext {
   page: Page;
   config: TaskConfig;
