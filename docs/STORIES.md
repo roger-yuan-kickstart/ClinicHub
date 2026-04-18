@@ -271,7 +271,7 @@
 
 **Depends on:** STORY-007
 
-**交付记录：** 见本 Story 对应 GitHub Pull Request（`PatientReportListPage.ts`；列表 URL 为 `thirdPartyUrl` + `patient-report-list` placeholder 路径）。
+**交付记录：** PR #11：`PatientReportListPage.ts`；列表 URL 为 `thirdPartyUrl` + `patient-report-list` placeholder 路径；选择器待 STORY-012 替换。
 
 ---
 
