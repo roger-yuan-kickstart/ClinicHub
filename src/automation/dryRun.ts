@@ -33,6 +33,7 @@ export async function confirmAction(description: string): Promise<boolean> {
 }
 
 async function confirmStepIfNeeded(description: string): Promise<boolean> {
+  // STEP_MODE prompts only when DRY_RUN is false: safeClick/safeFill return on dry-run before this runs.
   if (!config.stepMode) {
     return true;
   }
@@ -68,7 +69,7 @@ export async function safeFill(
   description: string,
 ): Promise<void> {
   if (config.dryRun) {
-    logDryRun(`Skip fill: ${description} (selector: ${selector}, value: "${value}")`);
+    logDryRun(`Skip fill: ${description} (selector: ${selector}, value: [REDACTED])`);
     return;
   }
 
