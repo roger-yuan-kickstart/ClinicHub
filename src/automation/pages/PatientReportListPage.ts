@@ -1,6 +1,7 @@
 import type { Page } from 'playwright';
 import { logger } from '../../logger';
 import type { PatientReport, TaskConfig } from '../../types';
+import { resolveThirdPartyPath } from './pageUtils';
 
 const LIST_ROOT_WAIT_MS = 30_000;
 
@@ -33,25 +34,18 @@ export class PatientReportListPage {
     this.config = config;
   }
 
-  private resolveReportListUrl(): string {
-    const raw = this.config.thirdPartyUrl.trim();
-    const base = raw.endsWith('/') ? raw : `${raw}/`;
-    try {
-      return new URL(PatientReportListPage.reportListPathSegment, base).href;
-    } catch {
-      throw new Error(
-        `PatientReportListPage: invalid thirdPartyUrl for report list navigation: ${this.config.thirdPartyUrl}`,
-      );
-    }
-  }
-
   async navigate(): Promise<void> {
-    const reportListUrl = this.resolveReportListUrl();
+    const reportListUrl = resolveThirdPartyPath(this.config, PatientReportListPage.reportListPathSegment);
     logger.info({ reportListUrl }, 'Navigating to patient report list');
     await this.page.goto(reportListUrl, { waitUntil: 'load' });
     logger.info({ reportListUrl }, 'Patient report list page load finished');
   }
 
+  /**
+   * Reads all report rows under the list root. If the real UI lazy-loads rows after the
+   * container paints, revisit empty detection after STORY-012 (e.g. wait for a row or an
+   * explicit empty-state marker before treating zero rows as an empty list).
+   */
   async getReportList(): Promise<PatientReport[]> {
     try {
       await this.page.locator(this.listRootSelector).first().waitFor({
