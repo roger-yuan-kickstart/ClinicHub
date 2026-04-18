@@ -161,19 +161,19 @@
 
 ### STORY-005 — 截图工具模块
 
-**状态：** `[ ]`
+**状态：** `[x] 已完成`
 
 **As a** developer auditing automation behavior,
 **I want** every key step of the workflow to automatically capture a screenshot with a meaningful filename,
 **So that** I can replay any run visually and identify exactly where something went wrong.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/screenshot.ts` 导出 `screenshot(page, stepName)` 函数
-- [ ] 截图文件名格式：`{YYYY-MM-DD_HH-mm-ss}_{stepName}.png`（时间戳在前，保证按时间排序）
-- [ ] 截图保存到 `config.SCREENSHOT_DIR`（默认 `./screenshots/`）
-- [ ] 首次截图时自动创建 `screenshots/` 目录（如不存在）
-- [ ] 截图失败时（例如页面已关闭），只打 `warn` 日志，不抛出异常（不能因截图失败中断主流程）
-- [ ] 截图成功后，日志输出文件保存路径
+- [x] `src/automation/screenshot.ts` 导出 `screenshot(page, stepName)` 函数
+- [x] 截图文件名格式：`{YYYY-MM-DD_HH-mm-ss}_{stepName}.png`（时间戳在前，保证按时间排序）
+- [x] 截图保存到 `config.SCREENSHOT_DIR`（默认 `./screenshots/`）
+- [x] 首次截图时自动创建 `screenshots/` 目录（如不存在）
+- [x] 截图失败时（例如页面已关闭），只打 `warn` 日志，不抛出异常（不能因截图失败中断主流程）
+- [x] 截图成功后，日志输出文件保存路径
 
 **Depends on:** STORY-003
 
@@ -560,7 +560,7 @@ STORY-007 (浏览器初始化)
 | STORY-003 | 统一日志工具 | Agent | `[x] 已完成` | 依赖 002 |
 | STORY-004 | Dry-Run 安全机制 | Agent | `[x] 已完成` | `src/automation/dryRun.ts`；依赖 003；**下一步 → 004b** |
 | STORY-004b | Supervised UI 确认面板 | Agent | `[x] 已完成` | `supervisedUI.ts` + `dryRun` 集成；`SUPERVISED_UI_PORT` 默认 7788 |
-| STORY-005 | 截图工具模块 | Agent | `[ ] 待开始` | 依赖 003 |
+| STORY-005 | 截图工具模块 | Agent | `[x] 已完成` | `screenshot.ts`；依赖 003 |
 | STORY-006 | 共享类型定义 | Agent | `[ ] 待开始` | 依赖 002 |
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[ ] 待开始` | 依赖 006 |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[ ] 待开始` | 新增 restoreSession / saveSession；依赖 007 |
@@ -574,7 +574,7 @@ STORY-007 (浏览器初始化)
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 4 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 5 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
