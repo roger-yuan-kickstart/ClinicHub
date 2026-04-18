@@ -22,6 +22,9 @@ export interface ClinicHubConfig {
   stepMode: boolean;
   browserHeadless: boolean;
   supervisedMode: boolean;
+  supervisedUiPort: number;
+  /** When > 0 and supervised mode is on, runner waits this long before shutdown (preview panel). */
+  supervisedUiSmokeHoldMs: number;
   slowMoMs: number;
   screenshotDir: string;
   logDir: string;
@@ -58,6 +61,22 @@ function parseBooleanEnv(key: string, defaultValue: boolean): boolean {
     return false;
   }
   throw new Error(`Invalid boolean value for ${key}. Expected true/false, got: ${raw}`);
+}
+
+function parsePort(key: string, defaultValue: number): number {
+  const raw = process.env[key];
+  if (raw === undefined || raw.trim() === '') {
+    return defaultValue;
+  }
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) {
+    throw new Error(`Invalid port for ${key}: ${raw}`);
+  }
+  const parsed = Number.parseInt(trimmed, 10);
+  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 65535) {
+    throw new Error(`Invalid port for ${key}: ${raw}`);
+  }
+  return parsed;
 }
 
 function parseNonNegativeInt(key: string, defaultValue: number): number {
@@ -115,6 +134,8 @@ function buildConfig(): ClinicHubConfig {
     stepMode: parseBooleanEnv('STEP_MODE', false),
     browserHeadless: parseBooleanEnv('BROWSER_HEADLESS', false),
     supervisedMode: parseBooleanEnv('SUPERVISED_MODE', false),
+    supervisedUiPort: parsePort('SUPERVISED_UI_PORT', 7788),
+    supervisedUiSmokeHoldMs: parseNonNegativeInt('SUPERVISED_UI_SMOKE_HOLD_MS', 0),
     slowMoMs: parseNonNegativeInt('SLOW_MO_MS', 500),
     screenshotDir: readOptionalString('SCREENSHOT_DIR', './screenshots'),
     logDir: readOptionalString('LOG_DIR', './logs'),
