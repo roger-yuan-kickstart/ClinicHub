@@ -249,7 +249,7 @@
 
 **Depends on:** STORY-007
 
-**交付记录：** 实现已合入本分支审查：`ThirdPartyLoginPage.ts`、`browser.ts` 条件 `storageState`；与先前 Story 文档修订同一 PR（分支 `docs/story-008-session-restore-ac`）。
+**交付记录：** PR #10（待合并）：`ThirdPartyLoginPage.ts`、`browser.ts` 条件 `storageState`，以及 STORY-008 文档 / AC 修订（分支 `docs/story-008-session-restore-ac`）。
 
 ---
 
