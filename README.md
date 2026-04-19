@@ -78,13 +78,14 @@ corepack prepare pnpm@9.15.4 --activate
 ```bash
 pnpm typecheck   # TypeScript compile check
 pnpm lint        # ESLint (zero warnings)
+pnpm setup-session  # Visible browser: log in manually, save Playwright session
 pnpm start       # Run entrypoint once (ts-node)
 pnpm dev         # Run with reload (ts-node-dev)
 ```
 
 ### Dry-Run 与真实模式
 
-环境变量模板见根目录 `.env.example`。复制为本地 `.env` 并填入测试凭据（**不要提交 `.env`**）。
+环境变量模板见根目录 `.env.example`。复制为本地 `.env` 并至少配置 `THIRD_PARTY_URL`（**不要提交 `.env`**）。账号密码不写入配置文件；首次请运行 `pnpm setup-session` 在浏览器中手动登录并保存 Session（`SESSION_STATE_PATH`，默认 `./recordings/auth.json`）。
 
 - **Dry-Run（推荐默认）：** 在 `.env` 中设置 `DRY_RUN=true`。写入类操作应由 `src/automation/dryRun.ts`（Story 004）拦截为仅日志；在 Story 004 落地前，仍请保持 `DRY_RUN=true` 作为安全默认。
 - **真实模式：** 设置 `DRY_RUN=false` 并确认你已理解所有写操作风险；建议同时按需开启 `STEP_MODE=true` 以便逐步确认。

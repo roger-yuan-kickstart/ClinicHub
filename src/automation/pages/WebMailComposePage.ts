@@ -3,12 +3,10 @@ import { safeClick, safeFill } from '../dryRun';
 import { logger } from '../../logger';
 import type { TaskConfig } from '../../types';
 
-const POST_LOGIN_WAIT_MS = 30_000;
 const IS_LOGGED_IN_PROBE_MS = 5_000;
 const COMPOSE_ELEMENT_WAIT_MS = 30_000;
 
 export interface WebMailComposeEmailInput {
-  to: string;
   subject: string;
   body: string;
 }
@@ -22,26 +20,11 @@ export class WebMailComposePage {
 
   private readonly config: TaskConfig;
 
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly usernameInputSelector = '[data-clinichub="webmail-login-username"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly passwordInputSelector = '[data-clinichub="webmail-login-password"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly loginButtonSelector = '[data-clinichub="webmail-login-submit"]';
-
   /** Visible after successful login (placeholder shell marker). */
   private readonly postLoginRootSelector = '[data-clinichub="webmail-post-login-root"]';
 
-  /** Optional error region on failed login (placeholder). */
-  private readonly loginErrorSelector = '[data-clinichub="webmail-login-error"]';
-
   /** Opens a new compose surface when landing on inbox-style chrome (placeholder). */
   private readonly newMessageButtonSelector = '[data-clinichub="webmail-compose-new"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly toInputSelector = '[data-clinichub="webmail-compose-to"]';
 
   /** Placeholder: replace after selector capture (STORY-012). */
   private readonly subjectInputSelector = '[data-clinichub="webmail-compose-subject"]';
@@ -60,30 +43,19 @@ export class WebMailComposePage {
   }
 
   /**
-   * Opens the webmail entry URL and completes credential login when no active session is detected.
+   * Assumes the Webmail UI was opened by the third-party workflow (popup or redirect).
+   * Does not navigate or perform credential login.
    */
   async navigate(): Promise<void> {
-    const { webmailUrl } = this.config;
-    logger.info({ webmailUrl }, 'Navigating to webmail');
-    await this.page.goto(webmailUrl, { waitUntil: 'load' });
-    logger.info({ webmailUrl }, 'Webmail entry page load finished');
-
-    const loggedIn = await this.isLoggedIn();
-    if (loggedIn) {
-      logger.info({ webmailUrl }, 'Webmail session already active');
-      return;
-    }
-
-    await this.loginFresh();
+    logger.info(
+      'WebMailComposePage: assuming webmail page is already open from the third-party flow',
+    );
   }
 
   /**
-   * Fills recipient, subject, and body. Enforces TEST_EMAIL_RECIPIENT when dry-run is on or a
-   * non-empty sandbox recipient is configured (see Phase 1 safety model in docs).
+   * Fills subject and body. Recipient is expected to be set by the third-party integration.
    */
   async composeEmail(input: WebMailComposeEmailInput): Promise<void> {
-    const recipient = this.resolveSandboxRecipient(input.to);
-
     // ensureComposeSurfaceReady ends with requireVisibleLocator (a real waitFor). In dry-run,
     // safeFill/safeClick no-op, so the compose UI never appears and the wait would time out on placeholders.
     if (!this.config.dryRun) {
@@ -92,13 +64,6 @@ export class WebMailComposePage {
       logger.info('[DRY-RUN] Skipping compose UI readiness wait');
     }
 
-    await safeFill(
-      this.page,
-      this.toInputSelector,
-      recipient,
-      'Webmail compose recipient',
-      WebMailComposePage.windowLabel,
-    );
     await safeFill(
       this.page,
       this.subjectInputSelector,
@@ -140,25 +105,6 @@ export class WebMailComposePage {
     }
   }
 
-  private resolveSandboxRecipient(requestedTo: string): string {
-    const requested = requestedTo.trim();
-    const testRecipient = this.config.testEmailRecipient.trim();
-    const mustUseSandbox = this.config.dryRun || testRecipient !== '';
-
-    if (!mustUseSandbox) {
-      return requested;
-    }
-
-    if (requested !== testRecipient) {
-      logger.warn(
-        { requestedTo: requested, testEmailRecipient: testRecipient },
-        '\u26a0\ufe0f Recipient overridden to TEST_EMAIL_RECIPIENT (sandbox protection)',
-      );
-    }
-
-    return testRecipient;
-  }
-
   private async ensureComposeSurfaceReady(): Promise<void> {
     await safeClick(
       this.page,
@@ -166,7 +112,7 @@ export class WebMailComposePage {
       'Webmail open new message',
       WebMailComposePage.windowLabel,
     );
-    await this.requireVisibleLocator(this.toInputSelector, 'compose recipient field');
+    await this.requireVisibleLocator(this.subjectInputSelector, 'compose subject field');
   }
 
   private async requireVisibleLocator(selector: string, fieldLabel: string): Promise<void> {
@@ -176,53 +122,6 @@ export class WebMailComposePage {
     } catch {
       throw new Error(
         `WebMailComposePage: ${fieldLabel} not visible or missing within timeout, selector: ${selector}`,
-      );
-    }
-  }
-
-  private async loginFresh(): Promise<void> {
-    await safeFill(
-      this.page,
-      this.usernameInputSelector,
-      this.config.webmailUsername,
-      'Webmail login username',
-      WebMailComposePage.windowLabel,
-    );
-    await safeFill(
-      this.page,
-      this.passwordInputSelector,
-      this.config.webmailPassword,
-      'Webmail login password',
-      WebMailComposePage.windowLabel,
-    );
-    await safeClick(
-      this.page,
-      this.loginButtonSelector,
-      'Webmail login submit',
-      WebMailComposePage.windowLabel,
-    );
-
-    if (this.config.dryRun) {
-      logger.info('[DRY-RUN] Webmail login actions were skipped; not waiting for post-login marker');
-      return;
-    }
-
-    try {
-      await this.page.locator(this.postLoginRootSelector).first().waitFor({
-        state: 'visible',
-        timeout: POST_LOGIN_WAIT_MS,
-      });
-    } catch {
-      const errorLocator = this.page.locator(this.loginErrorSelector).first();
-      const errorVisible = await errorLocator.isVisible().catch(() => false);
-      if (errorVisible) {
-        const text = (await errorLocator.innerText().catch(() => '')).trim();
-        throw new Error(
-          `Webmail login failed: error banner visible${text.length > 0 ? `: ${text}` : ''}`,
-        );
-      }
-      throw new Error(
-        'Webmail login failed: post-login marker not visible within timeout (selectors may need STORY-012 capture).',
       );
     }
   }

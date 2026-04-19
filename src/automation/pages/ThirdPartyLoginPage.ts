@@ -2,11 +2,10 @@ import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import type { BrowserContext, Page } from 'playwright';
-import { safeClick, safeFill } from '../dryRun';
 import { logger } from '../../logger';
 import type { TaskConfig } from '../../types';
 
-const POST_LOGIN_WAIT_MS = 30_000;
+const MANUAL_LOGIN_POLL_MS = 2_000;
 const IS_LOGGED_IN_PROBE_MS = 5_000;
 
 /**
@@ -20,22 +19,8 @@ export class ThirdPartyLoginPage {
 
   private readonly config: TaskConfig;
 
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly usernameInputSelector = '[data-clinichub="third-party-login-username"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly passwordInputSelector = '[data-clinichub="third-party-login-password"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly loginButtonSelector = '[data-clinichub="third-party-login-submit"]';
-
   /** Visible only after successful login (placeholder marker). */
   private readonly postLoginRootSelector = '[data-clinichub="third-party-post-login-root"]';
-
-  /** Optional error region on failed login (placeholder). */
-  private readonly loginErrorSelector = '[data-clinichub="third-party-login-error"]';
-
-  private static readonly windowLabel = 'ThirdParty';
 
   constructor(page: Page, context: BrowserContext, config: TaskConfig) {
     this.page = page;
@@ -58,7 +43,7 @@ export class ThirdPartyLoginPage {
     const absolute = resolve(path);
     if (!existsSync(absolute)) {
       throw new Error(
-        `Session state file not found: ${absolute}. Run loginFresh and saveSession first, or complete STORY-012 Session 0.`,
+        `Session state file not found: ${absolute}. Run pnpm setup-session first, or complete STORY-012 Session 0.`,
       );
     }
     await this.navigate();
@@ -75,52 +60,24 @@ export class ThirdPartyLoginPage {
     logger.info({ path: absolute }, 'Saved Playwright storage state');
   }
 
-  async loginFresh(username: string, password: string): Promise<void> {
-    await this.navigate();
-
-    await safeFill(
-      this.page,
-      this.usernameInputSelector,
-      username,
-      'Third-party login username',
-      ThirdPartyLoginPage.windowLabel,
-    );
-    await safeFill(
-      this.page,
-      this.passwordInputSelector,
-      password,
-      'Third-party login password',
-      ThirdPartyLoginPage.windowLabel,
-    );
-    await safeClick(
-      this.page,
-      this.loginButtonSelector,
-      'Third-party login submit',
-      ThirdPartyLoginPage.windowLabel,
-    );
-
+  /**
+   * Waits until the user signs in manually in the browser (polls {@link isLoggedIn}).
+   */
+  async waitForManualLogin(): Promise<void> {
     if (this.config.dryRun) {
-      logger.info('DRY_RUN: login form actions were skipped; not waiting for post-login marker');
+      logger.info('[DRY-RUN] Manual login wait skipped');
       return;
     }
 
-    try {
-      await this.page.locator(this.postLoginRootSelector).first().waitFor({
-        state: 'visible',
-        timeout: POST_LOGIN_WAIT_MS,
-      });
-    } catch {
-      const errorLocator = this.page.locator(this.loginErrorSelector).first();
-      const errorVisible = await errorLocator.isVisible().catch(() => false);
-      if (errorVisible) {
-        const text = (await errorLocator.innerText().catch(() => '')).trim();
-        throw new Error(
-          `Third-party login failed: error banner visible${text.length > 0 ? `: ${text}` : ''}`,
-        );
+    logger.info('Waiting for manual login (polling every 2 seconds)...');
+
+    for (;;) {
+      if (await this.isLoggedIn()) {
+        return;
       }
-      throw new Error(
-        'Third-party login failed: post-login marker not visible within timeout (selectors may need STORY-012 capture).',
-      );
+      await new Promise<void>((r) => {
+        setTimeout(r, MANUAL_LOGIN_POLL_MS);
+      });
     }
   }
 

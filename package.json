@@ -10,6 +10,7 @@
     "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",
+    "setup-session": "ts-node src/tools/setupSession.ts",
     "selector-capture": "ts-node src/tools/selectorCapture.ts"
   },
   "dependencies": {

@@ -3,15 +3,7 @@ import type { PinoLogLevelString, TaskConfig } from './types';
 
 dotenv.config();
 
-const REQUIRED_ENV_KEYS = [
-  'THIRD_PARTY_URL',
-  'THIRD_PARTY_USERNAME',
-  'THIRD_PARTY_PASSWORD',
-  'WEBMAIL_URL',
-  'WEBMAIL_USERNAME',
-  'WEBMAIL_PASSWORD',
-  'TEST_EMAIL_RECIPIENT',
-] as const;
+const REQUIRED_ENV_KEYS = ['THIRD_PARTY_URL'] as const;
 
 const PINO_LOG_LEVELS: readonly PinoLogLevelString[] = [
   'trace',
@@ -131,12 +123,6 @@ function buildConfig(): TaskConfig {
     sessionStatePath: readOptionalString('SESSION_STATE_PATH', './recordings/auth.json'),
     logLevel: parseLogLevel('LOG_LEVEL', 'info'),
     thirdPartyUrl: readTrimmed('THIRD_PARTY_URL')!,
-    thirdPartyUsername: readTrimmed('THIRD_PARTY_USERNAME')!,
-    thirdPartyPassword: readTrimmed('THIRD_PARTY_PASSWORD')!,
-    webmailUrl: readTrimmed('WEBMAIL_URL')!,
-    webmailUsername: readTrimmed('WEBMAIL_USERNAME')!,
-    webmailPassword: readTrimmed('WEBMAIL_PASSWORD')!,
-    testEmailRecipient: readTrimmed('TEST_EMAIL_RECIPIENT')!,
   };
 }
 
