@@ -355,7 +355,7 @@
 
 **Depends on:** STORY-007, STORY-008（需要 `createBrowserContext` 的 `storageState` 支持与 Login POM）
 
-**交付记录：** 分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts`（`createBrowserContext` + `config.sessionStatePath`）；`context.addInitScript` 悬停高亮 + 点击经 `context.exposeFunction` 回传；`window` / `context.on('page')` 多窗口；`pnpm selector-capture`。
+**交付记录：** **PR #14**，分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts`（`createBrowserContext` + `config.sessionStatePath`）；`context.addInitScript` 悬停高亮 + 点击经 `context.exposeFunction` 回传；`window` / `context.on('page')` 多窗口；`pnpm selector-capture`。
 
 ---
 
@@ -590,7 +590,7 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | PR #12 已合并至 `main`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | `WebMailComposePage.ts`；分支待 PR；选择器待 STORY-012 采集后补全 |
-| STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | `selectorCapture.ts` + `pnpm selector-capture`；分支待 PR |
+| STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | **PR #14**：`selectorCapture.ts` + `pnpm selector-capture` |
 | STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
 | STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
 | STORY-014 | 主入口 Runner | Agent | `[ ] 待开始` | 依赖 013 |
