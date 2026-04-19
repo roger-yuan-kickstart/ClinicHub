@@ -2,40 +2,33 @@ import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import type { BrowserContext, Page } from 'playwright';
-import { safeClick, safeFill } from '../dryRun';
 import { logger } from '../../logger';
 import type { TaskConfig } from '../../types';
 
-const POST_LOGIN_WAIT_MS = 30_000;
+/** Interval between manual-login polls (story: every 2 seconds). */
+const MANUAL_LOGIN_POLL_MS = 2_000;
+/** Short probe so each poll completes quickly while the user is not yet logged in. */
+const MANUAL_LOGIN_PROBE_MS = 1_000;
 const IS_LOGGED_IN_PROBE_MS = 5_000;
+/** Remind the operator every 5 minutes while login is still pending; not user-configurable (UX constant). */
+const MANUAL_LOGIN_REMINDER_MS = 300_000;
 
 /**
  * Third-party clinic system login page (Page Object).
  * Selectors are placeholders until STORY-012 captures real ones.
  */
 export class ThirdPartyLoginPage {
+  /** Window label for supervised UI and multi-window logs (STORY-004b / STORY-013). */
+  static readonly windowLabel = 'ThirdParty';
+
   private readonly page: Page;
 
   private readonly context: BrowserContext;
 
   private readonly config: TaskConfig;
 
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly usernameInputSelector = '[data-clinichub="third-party-login-username"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly passwordInputSelector = '[data-clinichub="third-party-login-password"]';
-
-  /** Placeholder: replace after selector capture (STORY-012). */
-  private readonly loginButtonSelector = '[data-clinichub="third-party-login-submit"]';
-
   /** Visible only after successful login (placeholder marker). */
   private readonly postLoginRootSelector = '[data-clinichub="third-party-post-login-root"]';
-
-  /** Optional error region on failed login (placeholder). */
-  private readonly loginErrorSelector = '[data-clinichub="third-party-login-error"]';
-
-  private static readonly windowLabel = 'ThirdParty';
 
   constructor(page: Page, context: BrowserContext, config: TaskConfig) {
     this.page = page;
@@ -58,7 +51,7 @@ export class ThirdPartyLoginPage {
     const absolute = resolve(path);
     if (!existsSync(absolute)) {
       throw new Error(
-        `Session state file not found: ${absolute}. Run loginFresh and saveSession first, or complete STORY-012 Session 0.`,
+        `Session state file not found: ${absolute}. Run pnpm setup-session first, or complete STORY-012 Session 0.`,
       );
     }
     await this.navigate();
@@ -68,67 +61,64 @@ export class ThirdPartyLoginPage {
     );
   }
 
-  async saveSession(path: string): Promise<void> {
+  async saveSession(path: string): Promise<string> {
     const absolute = resolve(path);
     await mkdir(dirname(absolute), { recursive: true });
     await this.context.storageState({ path: absolute });
     logger.info({ path: absolute }, 'Saved Playwright storage state');
+    return absolute;
   }
 
-  async loginFresh(username: string, password: string): Promise<void> {
-    await this.navigate();
-
-    await safeFill(
-      this.page,
-      this.usernameInputSelector,
-      username,
-      'Third-party login username',
-      ThirdPartyLoginPage.windowLabel,
-    );
-    await safeFill(
-      this.page,
-      this.passwordInputSelector,
-      password,
-      'Third-party login password',
-      ThirdPartyLoginPage.windowLabel,
-    );
-    await safeClick(
-      this.page,
-      this.loginButtonSelector,
-      'Third-party login submit',
-      ThirdPartyLoginPage.windowLabel,
-    );
-
+  /**
+   * Waits until the user signs in manually in the browser (polls {@link isLoggedIn}).
+   */
+  async waitForManualLogin(): Promise<void> {
     if (this.config.dryRun) {
-      logger.info('DRY_RUN: login form actions were skipped; not waiting for post-login marker');
+      logger.info('[DRY-RUN] Manual login wait skipped');
       return;
     }
 
-    try {
-      await this.page.locator(this.postLoginRootSelector).first().waitFor({
-        state: 'visible',
-        timeout: POST_LOGIN_WAIT_MS,
-      });
-    } catch {
-      const errorLocator = this.page.locator(this.loginErrorSelector).first();
-      const errorVisible = await errorLocator.isVisible().catch(() => false);
-      if (errorVisible) {
-        const text = (await errorLocator.innerText().catch(() => '')).trim();
+    const timeoutMs = this.config.manualLoginTimeoutMs;
+    logger.info(
+      {
+        windowLabel: ThirdPartyLoginPage.windowLabel,
+        timeoutMs: timeoutMs === 0 ? 'unlimited' : timeoutMs,
+        pollMs: MANUAL_LOGIN_POLL_MS,
+      },
+      'Waiting for manual login. Press Ctrl+C to abort.',
+    );
+
+    const start = Date.now();
+    let lastReminder = start;
+
+    for (;;) {
+      if (await this.isLoggedIn(MANUAL_LOGIN_PROBE_MS)) {
+        return;
+      }
+      const now = Date.now();
+      if (timeoutMs > 0 && now - start >= timeoutMs) {
         throw new Error(
-          `Third-party login failed: error banner visible${text.length > 0 ? `: ${text}` : ''}`,
+          `Manual login timed out after ${timeoutMs} ms. Sign in in the browser, or set MANUAL_LOGIN_TIMEOUT_MS=0 for no limit.`,
         );
       }
-      throw new Error(
-        'Third-party login failed: post-login marker not visible within timeout (selectors may need STORY-012 capture).',
-      );
+      if (now - lastReminder >= MANUAL_LOGIN_REMINDER_MS) {
+        logger.warn(
+          { windowLabel: ThirdPartyLoginPage.windowLabel },
+          'Still waiting for manual login. Complete sign-in in the browser, or press Ctrl+C to abort.',
+        );
+        lastReminder = now;
+      }
+      await new Promise<void>((r) => {
+        setTimeout(r, MANUAL_LOGIN_POLL_MS);
+      });
     }
   }
 
-  async isLoggedIn(): Promise<boolean> {
+  async isLoggedIn(probeTimeoutMs: number = IS_LOGGED_IN_PROBE_MS): Promise<boolean> {
     try {
       await this.page.locator(this.postLoginRootSelector).first().waitFor({
         state: 'visible',
-        timeout: IS_LOGGED_IN_PROBE_MS,
+        timeout: probeTimeoutMs,
       });
       return true;
     } catch {

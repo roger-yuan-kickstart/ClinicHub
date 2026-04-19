@@ -11,8 +11,8 @@ export type PinoLogLevelString =
   | 'fatal';
 
 /**
- * Runtime configuration for a single automation task (credentials, safety switches,
- * output paths, Playwright-related settings).
+ * Runtime configuration for a single automation task (safety switches, output paths,
+ * Playwright-related settings). Credentials are never stored; session state is loaded from disk.
  */
 export interface TaskConfig {
   dryRun: boolean;
@@ -28,12 +28,10 @@ export interface TaskConfig {
   sessionStatePath: string;
   logLevel: PinoLogLevelString;
   thirdPartyUrl: string;
-  thirdPartyUsername: string;
-  thirdPartyPassword: string;
-  webmailUrl: string;
-  webmailUsername: string;
-  webmailPassword: string;
-  testEmailRecipient: string;
+  /**
+   * Max time to wait for manual login (`pnpm setup-session`, `waitForManualLogin`). `0` = no limit.
+   */
+  manualLoginTimeoutMs: number;
 }
 
 /**

@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点：** 下一个 Agent 实现 Story：**STORY-002a**（移除凭据配置 & 新建 `pnpm setup-session` 工具）；完成后人类继续 **STORY-012**（分段选择器采集，Session 0 改用 `pnpm setup-session`）。**STORY-012a** 工具已于 **PR #14** 合入 `main`。**STORY-011** 已在分支 `feature/story-011-webmail-compose-page` 交付（待 PR 合入 `main`；注意 STORY-002a 将进一步修订其 `WebMailComposePage.ts`）。**STORY-010** 已于 **PR #12** 合入 `main`。
+> **当前进度：** 人类 **STORY-012** 分段选择器采集中（`[~]` 进行中；Session 0 用 `pnpm setup-session`）。**STORY-002a** 代码与文档随 **PR #15** 合入 `main`（凭据移除 + `pnpm setup-session`）。**STORY-013**（主工作流）硬依赖 **STORY-012** 完成，待 012 收尾后再由 Agent 开工。编排登录须对齐 002a：`waitForManualLogin` / 已保存 session，勿引用已删除的凭据 env。**STORY-012a** PR #14、**STORY-010** PR #12 已在 `main`。
 
 ---
 
@@ -87,6 +87,8 @@
 - [x] `SUPERVISED_MODE` 布尔值，默认 `false`；为 `true` 时每步操作前弹出本地 UI 确认面板
 
 **Depends on:** STORY-001
+
+> **后续修订（STORY-002a）：** 必填环境变量已精简为仅 `THIRD_PARTY_URL`；`THIRD_PARTY_*` / `WEBMAIL_*` / `TEST_EMAIL_RECIPIENT` 已从 `config` 删除，凭据不入库。
 
 ---
 
@@ -321,7 +323,7 @@
 
 **交付记录：** 分支 `feature/story-011-webmail-compose-page`：`WebMailComposePage.ts`（`navigate` / `loginFresh` 与 `ThirdPartyLoginPage` 对齐；`composeEmail` 经 `safeFill`；`sendEmail` 经 `safeClick`）；沙箱替换日志在代码中为英文 + `\u26a0\ufe0f`（遵守仓库 ESLint 禁止源码中文）；选择器待 STORY-012 替换。
 
-> ⚠️ **STORY-002a 修订：** 本 Story 中「收件人沙箱强制保护」条目及独立 Webmail URL 登录逻辑，已由 **STORY-002a** 正式废除。STORY-002a 将重写 `WebMailComposePage.ts` 的 `navigate()` 和 `composeEmail()` 实现，以本 Story 的骨架为基础。
+> ⚠️ **STORY-002a 修订：** 本 Story 中「收件人沙箱强制保护」条目及独立 Webmail URL 登录逻辑，已由 **STORY-002a** 正式废除。STORY-002a 将重写 `WebMailComposePage.ts` 的入口方法（现为 `noteWebmailAssumedOpen()`，不执行 `goto`）和 `composeEmail()` 实现，以本 Story 的骨架为基础。
 
 ---
 
@@ -363,7 +365,7 @@
 
 ### STORY-002a — 移除凭据配置 & 手动登录 Session 建立工具
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 > **背景决策：** 出于安全考虑，任何账号密码均不得存入系统（包括 `.env`）。End user 在浏览器中亲自登录，Playwright 自动检测登录成功并保存 session；后续自动化运行完全依赖已保存的 session，无需任何凭据。
 
@@ -374,31 +376,33 @@
 **Acceptance Criteria:**
 
 **配置层清理：**
-- [ ] 从 `.env.example`、`src/config.ts`、`src/types/index.ts`（`TaskConfig`）中删除以下 6 个字段：`THIRD_PARTY_USERNAME`、`THIRD_PARTY_PASSWORD`、`WEBMAIL_URL`、`WEBMAIL_USERNAME`、`WEBMAIL_PASSWORD`、`TEST_EMAIL_RECIPIENT`
-- [ ] `src/config.ts` 的必填字段校验简化为仅检查：`THIRD_PARTY_URL`
-- [ ] `.env.example` 更新注释，说明账号密码由用户在浏览器中手动输入，不存储
+- [x] 从 `.env.example`、`src/config.ts`、`src/types/index.ts`（`TaskConfig`）中删除以下 6 个字段：`THIRD_PARTY_USERNAME`、`THIRD_PARTY_PASSWORD`、`WEBMAIL_URL`、`WEBMAIL_USERNAME`、`WEBMAIL_PASSWORD`、`TEST_EMAIL_RECIPIENT`
+- [x] `src/config.ts` 的必填字段校验简化为仅检查：`THIRD_PARTY_URL`
+- [x] `.env.example` 更新注释，说明账号密码由用户在浏览器中手动输入，不存储
 
 **Session 建立工具：**
-- [ ] `src/tools/setupSession.ts` 新建，通过 `pnpm setup-session` 启动（`package.json` 新增 script）
-- [ ] 启动时始终以 `headless: false` 打开浏览器（忽略 `BROWSER_HEADLESS`，必须可见）
-- [ ] 自动导航到 `THIRD_PARTY_URL`
-- [ ] 打印提示：`"Please log in manually. Playwright will save your session automatically once login is detected."`
-- [ ] 每 2 秒调用一次 `isLoggedIn()`；检测到登录成功后立即调用 `saveSession(config.sessionStatePath)`
-- [ ] 打印确认：`"Session saved to {path}. You can now run 'pnpm start'."`，然后关闭浏览器退出
+- [x] `src/tools/setupSession.ts` 新建，通过 `pnpm setup-session` 启动（`package.json` 新增 script）
+- [x] 启动时始终以 `headless: false` 打开浏览器（忽略 `BROWSER_HEADLESS`，必须可见）
+- [x] 自动导航到 `THIRD_PARTY_URL`
+- [x] 打印提示：`"Please log in manually. Playwright will save your session automatically once login is detected."`
+- [x] 每 2 秒调用一次 `isLoggedIn()`；检测到登录成功后立即调用 `saveSession(config.sessionStatePath)`
+- [x] 打印确认：`"Session saved to {path}. You can now run 'pnpm start'."`，然后关闭浏览器退出
 
 **Page Object 更新：**
-- [ ] `ThirdPartyLoginPage.ts`：将 `loginFresh(username, password)` 替换为 `waitForManualLogin()`（无凭据参数）；内部每 2 秒轮询 `isLoggedIn()`，检测成功后返回
-- [ ] `WebMailComposePage.ts`：移除 `navigate()` 中基于 URL + 账号密码的独立登录逻辑；Webmail 页面由第三方系统自动弹出/跳转，Page Object 只需接管已开启的页面
-- [ ] `WebMailComposePage.ts`：移除收件人沙箱替换逻辑（`TEST_EMAIL_RECIPIENT` 相关代码全部删除）
-- [ ] `composeEmail()` 签名更新为 `composeEmail({ subject, body })`，移除 `to` 参数（收件人由第三方系统自动填写）
+- [x] `ThirdPartyLoginPage.ts`：将 `loginFresh(username, password)` 替换为 `waitForManualLogin()`（无凭据参数）；内部每 2 秒轮询 `isLoggedIn()`，检测成功后返回
+- [x] `WebMailComposePage.ts`：移除基于 URL + 账号密码的独立登录逻辑；以 `noteWebmailAssumedOpen()` 标明「页面已由第三方打开」；Webmail 页面由第三方系统自动弹出/跳转，Page Object 只需接管已开启的页面
+- [x] `WebMailComposePage.ts`：移除收件人沙箱替换逻辑（`TEST_EMAIL_RECIPIENT` 相关代码全部删除）
+- [x] `composeEmail()` 签名更新为 `composeEmail({ subject, body })`，移除 `to` 参数（收件人由第三方系统自动填写）
 
 **质量验证：**
-- [ ] `pnpm typecheck` 零错误
-- [ ] `pnpm lint` 零警告
+- [x] `pnpm typecheck` 零错误
+- [x] `pnpm lint` 零警告
 
 **Depends on:** STORY-002, STORY-008, STORY-011
 
 > **注意：** STORY-011 的 AC 中「收件人沙箱强制保护」条目由本 Story 正式废除，`WebMailComposePage.ts` 的实现以本 Story 交付为准。
+
+**交付记录：** **PR #15** 已合并至 `main`（分支 `feature/story-002a-setup-session`）。
 
 ---
 
@@ -466,7 +470,7 @@
 - [ ] `src/automation/workflows/ReviewAndReplyWorkflow.ts` 导出 `runReviewAndReply(config: TaskConfig): Promise<TaskResult>` 函数
 - [ ] 严格按照以下步骤编排（每步之间截图）：
   1. 初始化浏览器 & BrowserContext（`createBrowserContext(config)`：若 `config.sessionStatePath` 文件存在则传入 `storageState`）
-  2. 登录第三方系统：当 `config.sessionStatePath` 文件存在时，调用 `restoreSession(config.sessionStatePath)` 并检查 `isLoggedIn()`；当文件不存在或 `isLoggedIn()` 为 `false` 时，执行 `loginFresh(config.thirdPartyUsername, config.thirdPartyPassword)`，成功后 `saveSession(config.sessionStatePath)`（截图：`01-session-restored` 或 `01-fresh-login`）
+  2. 登录第三方系统：当 `config.sessionStatePath` 文件存在时，调用 `restoreSession(config.sessionStatePath)` 并检查 `isLoggedIn()`；当文件不存在或 `isLoggedIn()` 为 `false` 时，执行 `navigate()` + `waitForManualLogin()`，成功后 `saveSession(config.sessionStatePath)`（截图：`01-session-restored` 或 `01-fresh-login`）。**不得**使用已删除的凭据 env；首次建立 Session 须由用户在浏览器中手动登录或预先运行 `pnpm setup-session`。
   3. 获取报告列表（截图：`02-report-list`）
   4. 遍历每条报告：
      - 打开报告详情（截图：`03-report-{patientId}`）
@@ -525,7 +529,7 @@
 - [ ] `[DRY-RUN]` 标记的条目清楚显示"跳过了什么操作"
 - [ ] `screenshots/` 目录下有每个步骤对应的截图文件，按时间戳排序
 - [ ] 每张截图打开后，画面内容与步骤描述一致（人工目视检查）
-- [ ] 日志中无真实收件人出现（验证沙箱保护生效）
+- [ ] 日志中不出现由自动化 **新写入** 的患者敏感信息（邮箱、电话等）的误导性记录；若出现收件人相关文本，应能说明其来源为第三方预填、Dry-Run 跳过说明或占位（与 STORY-002a 移除 `TEST_EMAIL_RECIPIENT` 沙箱后的模型一致）
 - [ ] 运行结束时，控制台打印汇总，处理报告数量正确
 
 **Depends on:** STORY-014
@@ -542,11 +546,11 @@
 
 **As a** developer who has validated the Dry-Run flow,
 **I want** to run the script in real mode with human confirmation gates active,
-**So that** I can verify the system can successfully send one real email to the test inbox with full audit trail.
+**So that** I can verify the system can successfully send one real email to an inbox appropriate for the test (per third-party pre-filled recipient or agreed test address), with full audit trail.
 
 **Acceptance Criteria:**
 - [ ] `DRY_RUN=false pnpm start` 运行时，所有 `confirmAction` 关卡正常工作（输入 `yes` 才继续）
-- [ ] 测试收件人邮箱（`TEST_EMAIL_RECIPIENT`）成功收到至少一封测试邮件
+- [ ] 至少一封测试邮件到达本次验证所约定的收件箱（收件人由第三方写信界面预填或当次业务/测试约定确定；**不再**使用已删除的 `TEST_EMAIL_RECIPIENT` env）
 - [ ] 邮件内容与报告数据匹配（非乱码、非模板占位符）
 - [ ] 第三方系统中对应患者的回复字段已被正确填写，带有 `[TEST]` 标记
 - [ ] `screenshots/` 目录有完整的截图存档，包括邮件发送成功截图
@@ -576,15 +580,15 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
     ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；PR #12 已合并至 `main`）
-    └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；分支 `feature/story-011-webmail-compose-page`，待 PR）
+    └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；PR #13 → `main`，后由 002a/PR #15 修订）
          ↓
     STORY-012a ✅（交互式选择器采集工具；PR #14 → `main`）
          ↓
-    STORY-002a [ ] Agent 任务（移除凭据配置 & setup-session 工具；依赖 002+008+011）
+    STORY-002a ✅（移除凭据配置 & `pnpm setup-session`；PR #15 → `main`；依赖 002+008+011）
          ↓
-    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3），`[~]` 进行中，需先完成 STORY-002a]
+    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3），`[~]` 进行中 — **阻塞 STORY-013**]
          ↓
-    STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI)
+    STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI；**开工条件: 012 完成**)
          ↓
     STORY-014 (主入口 Runner)
          ↓
@@ -635,19 +639,19 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | PR #12 已合并至 `main`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
-| STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | `WebMailComposePage.ts`；分支待 PR；选择器待 STORY-012 采集后补全 |
+| STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | PR #13 → `main`；002a/PR #15 修订 compose；选择器待 STORY-012 采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | **PR #14** 已合并至 `main`：`selectorCapture.ts` + `pnpm selector-capture` |
-| STORY-002a | 移除凭据配置 & setup-session 工具 | Agent | `[ ] 待开始` | 删除 6 个凭据字段；新建 `setupSession.ts`；更新 `ThirdPartyLoginPage` + `WebMailComposePage` |
-| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[~] 进行中` | Session 0 改用 `pnpm setup-session`；依赖 002a + 012a + 008~011 |
-| STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
+| STORY-002a | 移除凭据配置 & setup-session 工具 | Agent | `[x] 已完成` | **PR #15** → `main`：`setupSession.ts`、`waitForManualLogin`、compose 无凭据 |
+| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[~] 进行中` | 阻塞 STORY-013；Session 0 用 `pnpm setup-session`；依赖 002a + 012a + 008~011 |
+| STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 依赖 **STORY-012** 完成；Session 恢复 & Supervised UI |
 | STORY-014 | 主入口 Runner | Agent | `[ ] 待开始` | 依赖 013 |
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 12 / 19 完成 &nbsp;|&nbsp; 🤖 Agent 任务：15 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 13 / 19 完成 &nbsp;|&nbsp; 🤖 Agent 任务：15 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
-*最后更新：2026-04-18*
+*最后更新：2026-04-19*
 *文档维护：Top Agent（架构决策 & Story 设计）*
 *执行：Implementation Agent（Story 级别逐一完成）*
