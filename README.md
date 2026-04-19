@@ -78,7 +78,7 @@ corepack prepare pnpm@9.15.4 --activate
 ```bash
 pnpm typecheck   # TypeScript compile check
 pnpm lint        # ESLint (zero warnings)
-pnpm setup-session  # Visible browser: log in manually, save Playwright session
+pnpm setup-session  # Visible browser: manual login; optional MANUAL_LOGIN_TIMEOUT_MS in .env (0 = no limit)
 pnpm start       # Run entrypoint once (ts-node)
 pnpm dev         # Run with reload (ts-node-dev)
 ```

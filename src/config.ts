@@ -123,6 +123,7 @@ function buildConfig(): TaskConfig {
     sessionStatePath: readOptionalString('SESSION_STATE_PATH', './recordings/auth.json'),
     logLevel: parseLogLevel('LOG_LEVEL', 'info'),
     thirdPartyUrl: readTrimmed('THIRD_PARTY_URL')!,
+    manualLoginTimeoutMs: parseNonNegativeInt('MANUAL_LOGIN_TIMEOUT_MS', 900_000),
   };
 }
 

@@ -323,7 +323,7 @@
 
 **交付记录：** 分支 `feature/story-011-webmail-compose-page`：`WebMailComposePage.ts`（`navigate` / `loginFresh` 与 `ThirdPartyLoginPage` 对齐；`composeEmail` 经 `safeFill`；`sendEmail` 经 `safeClick`）；沙箱替换日志在代码中为英文 + `\u26a0\ufe0f`（遵守仓库 ESLint 禁止源码中文）；选择器待 STORY-012 替换。
 
-> ⚠️ **STORY-002a 修订：** 本 Story 中「收件人沙箱强制保护」条目及独立 Webmail URL 登录逻辑，已由 **STORY-002a** 正式废除。STORY-002a 将重写 `WebMailComposePage.ts` 的 `navigate()` 和 `composeEmail()` 实现，以本 Story 的骨架为基础。
+> ⚠️ **STORY-002a 修订：** 本 Story 中「收件人沙箱强制保护」条目及独立 Webmail URL 登录逻辑，已由 **STORY-002a** 正式废除。STORY-002a 将重写 `WebMailComposePage.ts` 的入口方法（现为 `noteWebmailAssumedOpen()`，不执行 `goto`）和 `composeEmail()` 实现，以本 Story 的骨架为基础。
 
 ---
 
@@ -390,7 +390,7 @@
 
 **Page Object 更新：**
 - [x] `ThirdPartyLoginPage.ts`：将 `loginFresh(username, password)` 替换为 `waitForManualLogin()`（无凭据参数）；内部每 2 秒轮询 `isLoggedIn()`，检测成功后返回
-- [x] `WebMailComposePage.ts`：移除 `navigate()` 中基于 URL + 账号密码的独立登录逻辑；Webmail 页面由第三方系统自动弹出/跳转，Page Object 只需接管已开启的页面
+- [x] `WebMailComposePage.ts`：移除基于 URL + 账号密码的独立登录逻辑；以 `noteWebmailAssumedOpen()` 标明「页面已由第三方打开」；Webmail 页面由第三方系统自动弹出/跳转，Page Object 只需接管已开启的页面
 - [x] `WebMailComposePage.ts`：移除收件人沙箱替换逻辑（`TEST_EMAIL_RECIPIENT` 相关代码全部删除）
 - [x] `composeEmail()` 签名更新为 `composeEmail({ subject, body })`，移除 `to` 参数（收件人由第三方系统自动填写）
 
@@ -527,7 +527,7 @@
 - [ ] `[DRY-RUN]` 标记的条目清楚显示"跳过了什么操作"
 - [ ] `screenshots/` 目录下有每个步骤对应的截图文件，按时间戳排序
 - [ ] 每张截图打开后，画面内容与步骤描述一致（人工目视检查）
-- [ ] 日志中无真实收件人出现（验证沙箱保护生效）
+- [ ] 日志中不出现由自动化 **新写入** 的患者敏感信息（邮箱、电话等）的误导性记录；若出现收件人相关文本，应能说明其来源为第三方预填、Dry-Run 跳过说明或占位（与 STORY-002a 移除 `TEST_EMAIL_RECIPIENT` 沙箱后的模型一致）
 - [ ] 运行结束时，控制台打印汇总，处理报告数量正确
 
 **Depends on:** STORY-014
@@ -544,11 +544,11 @@
 
 **As a** developer who has validated the Dry-Run flow,
 **I want** to run the script in real mode with human confirmation gates active,
-**So that** I can verify the system can successfully send one real email to the test inbox with full audit trail.
+**So that** I can verify the system can successfully send one real email to an inbox appropriate for the test (per third-party pre-filled recipient or agreed test address), with full audit trail.
 
 **Acceptance Criteria:**
 - [ ] `DRY_RUN=false pnpm start` 运行时，所有 `confirmAction` 关卡正常工作（输入 `yes` 才继续）
-- [ ] 测试收件人邮箱（`TEST_EMAIL_RECIPIENT`）成功收到至少一封测试邮件
+- [ ] 至少一封测试邮件到达本次验证所约定的收件箱（收件人由第三方写信界面预填或当次业务/测试约定确定；**不再**使用已删除的 `TEST_EMAIL_RECIPIENT` env）
 - [ ] 邮件内容与报告数据匹配（非乱码、非模板占位符）
 - [ ] 第三方系统中对应患者的回复字段已被正确填写，带有 `[TEST]` 标记
 - [ ] `screenshots/` 目录有完整的截图存档，包括邮件发送成功截图

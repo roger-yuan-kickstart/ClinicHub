@@ -43,12 +43,14 @@ export class WebMailComposePage {
   }
 
   /**
-   * Assumes the Webmail UI was opened by the third-party workflow (popup or redirect).
-   * Does not navigate or perform credential login.
+   * Call when the webmail surface was already opened by the third-party app (popup or redirect).
+   * This does **not** call `page.goto` or perform login — the name intentionally avoids `navigate`
+   * so callers do not assume a URL navigation occurs.
    */
-  async navigate(): Promise<void> {
+  async noteWebmailAssumedOpen(): Promise<void> {
     logger.info(
-      'WebMailComposePage: assuming webmail page is already open from the third-party flow',
+      { windowLabel: WebMailComposePage.windowLabel },
+      'Webmail page is assumed already open from the third-party flow (no navigation performed)',
     );
   }
 

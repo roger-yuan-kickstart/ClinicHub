@@ -10,12 +10,17 @@ const MANUAL_LOGIN_POLL_MS = 2_000;
 /** Short probe so each poll completes quickly while the user is not yet logged in. */
 const MANUAL_LOGIN_PROBE_MS = 1_000;
 const IS_LOGGED_IN_PROBE_MS = 5_000;
+/** Reminder log if login is still pending (UX; not configurable). */
+const MANUAL_LOGIN_REMINDER_MS = 300_000;
 
 /**
  * Third-party clinic system login page (Page Object).
  * Selectors are placeholders until STORY-012 captures real ones.
  */
 export class ThirdPartyLoginPage {
+  /** Window label for supervised UI and multi-window logs (STORY-004b / STORY-013). */
+  static readonly windowLabel = 'ThirdParty';
+
   private readonly page: Page;
 
   private readonly context: BrowserContext;
@@ -56,11 +61,12 @@ export class ThirdPartyLoginPage {
     );
   }
 
-  async saveSession(path: string): Promise<void> {
+  async saveSession(path: string): Promise<string> {
     const absolute = resolve(path);
     await mkdir(dirname(absolute), { recursive: true });
     await this.context.storageState({ path: absolute });
     logger.info({ path: absolute }, 'Saved Playwright storage state');
+    return absolute;
   }
 
   /**
@@ -72,11 +78,35 @@ export class ThirdPartyLoginPage {
       return;
     }
 
-    logger.info('Waiting for manual login (polling every 2 seconds)...');
+    const timeoutMs = this.config.manualLoginTimeoutMs;
+    logger.info(
+      {
+        windowLabel: ThirdPartyLoginPage.windowLabel,
+        timeoutMs: timeoutMs === 0 ? 'unlimited' : timeoutMs,
+        pollMs: MANUAL_LOGIN_POLL_MS,
+      },
+      'Waiting for manual login. Press Ctrl+C to abort.',
+    );
+
+    const start = Date.now();
+    let lastReminder = start;
 
     for (;;) {
       if (await this.isLoggedIn(MANUAL_LOGIN_PROBE_MS)) {
         return;
+      }
+      const now = Date.now();
+      if (timeoutMs > 0 && now - start >= timeoutMs) {
+        throw new Error(
+          `Manual login timed out after ${timeoutMs} ms. Sign in in the browser, or set MANUAL_LOGIN_TIMEOUT_MS=0 for no limit.`,
+        );
+      }
+      if (now - lastReminder >= MANUAL_LOGIN_REMINDER_MS) {
+        logger.warn(
+          { windowLabel: ThirdPartyLoginPage.windowLabel },
+          'Still waiting for manual login. Complete sign-in in the browser, or press Ctrl+C to abort.',
+        );
+        lastReminder = now;
       }
       await new Promise<void>((r) => {
         setTimeout(r, MANUAL_LOGIN_POLL_MS);

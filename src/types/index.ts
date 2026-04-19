@@ -28,6 +28,10 @@ export interface TaskConfig {
   sessionStatePath: string;
   logLevel: PinoLogLevelString;
   thirdPartyUrl: string;
+  /**
+   * Max time to wait for manual login (`pnpm setup-session`, `waitForManualLogin`). `0` = no limit.
+   */
+  manualLoginTimeoutMs: number;
 }
 
 /**

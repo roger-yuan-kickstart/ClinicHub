@@ -3,7 +3,6 @@
  * then persist Playwright storage state to SESSION_STATE_PATH.
  */
 
-import { resolve } from 'node:path';
 import { closeBrowser, createBrowserContext } from '../automation/browser';
 import { ThirdPartyLoginPage } from '../automation/pages/ThirdPartyLoginPage';
 import { config } from '../config';
@@ -19,9 +18,8 @@ async function main(): Promise<void> {
       'Please log in manually. Playwright will save your session automatically once login is detected.',
     );
     await loginPage.waitForManualLogin();
-    await loginPage.saveSession(sessionConfig.sessionStatePath);
-    const absolute = resolve(sessionConfig.sessionStatePath);
-    logger.info(`Session saved to ${absolute}. You can now run 'pnpm start'.`);
+    const savedPath = await loginPage.saveSession(sessionConfig.sessionStatePath);
+    logger.info(`Session saved to ${savedPath}. You can now run 'pnpm start'.`);
   } finally {
     await closeBrowser({ browser: session.browser, context: session.context });
   }
