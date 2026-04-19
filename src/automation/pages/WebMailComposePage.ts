@@ -84,6 +84,8 @@ export class WebMailComposePage {
   async composeEmail(input: WebMailComposeEmailInput): Promise<void> {
     const recipient = this.resolveSandboxRecipient(input.to);
 
+    // ensureComposeSurfaceReady ends with requireVisibleLocator (a real waitFor). In dry-run,
+    // safeFill/safeClick no-op, so the compose UI never appears and the wait would time out on placeholders.
     if (!this.config.dryRun) {
       await this.ensureComposeSurfaceReady();
     } else {
@@ -121,6 +123,21 @@ export class WebMailComposePage {
       'Webmail send message',
       WebMailComposePage.windowLabel,
     );
+  }
+
+  /**
+   * Returns whether the post-login shell marker is visible (short probe), for session checks without navigate/login.
+   */
+  async isLoggedIn(): Promise<boolean> {
+    try {
+      await this.page.locator(this.postLoginRootSelector).first().waitFor({
+        state: 'visible',
+        timeout: IS_LOGGED_IN_PROBE_MS,
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private resolveSandboxRecipient(requestedTo: string): string {
@@ -163,18 +180,6 @@ export class WebMailComposePage {
     }
   }
 
-  private async isLoggedIn(): Promise<boolean> {
-    try {
-      await this.page.locator(this.postLoginRootSelector).first().waitFor({
-        state: 'visible',
-        timeout: IS_LOGGED_IN_PROBE_MS,
-      });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   private async loginFresh(): Promise<void> {
     await safeFill(
       this.page,
@@ -198,7 +203,7 @@ export class WebMailComposePage {
     );
 
     if (this.config.dryRun) {
-      logger.info('DRY_RUN: webmail login actions were skipped; not waiting for post-login marker');
+      logger.info('[DRY-RUN] Webmail login actions were skipped; not waiting for post-login marker');
       return;
     }
 
