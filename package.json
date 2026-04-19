@@ -9,7 +9,8 @@
     "dev": "ts-node-dev src/runner.ts",
     "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "selector-capture": "ts-node src/tools/selectorCapture.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
