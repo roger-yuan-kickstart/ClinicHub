@@ -3,6 +3,10 @@ import { logger } from '../../logger';
 import type { PatientReport, TaskConfig } from '../../types';
 import { resolveThirdPartyPath } from './pageUtils';
 
+/**
+ * Default max wait for detail-page locators. Revisit after STORY-012 if real selectors or high
+ * `SLOW_MO_MS` cause flakes; longer waits can also be introduced at workflow/playwright defaults later.
+ */
 const DETAIL_ELEMENT_WAIT_MS = 30_000;
 
 /**
@@ -58,6 +62,8 @@ export class PatientReportDetailPage {
     logger.info({ reportDetailUrl, reportId: trimmed }, 'Navigating to patient report detail');
     await this.page.goto(reportDetailUrl, { waitUntil: 'load' });
     logger.info({ reportDetailUrl }, 'Patient report detail page load finished');
+    await this.requireVisibleLocator(this.detailRootSelector, 'report detail root');
+    logger.info({ reportDetailUrl }, 'Patient report detail root visible');
   }
 
   private async requireVisibleLocator(selector: string, fieldLabel: string) {
