@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点（进行中）：** **STORY-010** — 患者报告详情页 POM。STORY-009 已于 **PR #11** 合入 `main`（`PatientReportListPage.ts`、`pageUtils.ts` / `resolveThirdPartyPath`）。
+> **当前 Agent 焦点（进行中）：** **STORY-011** — Web 邮件撰写页 POM（栈顶）。**STORY-010**（`PatientReportDetailPage.ts`）**PR #12** → `main`（代码已审核通过，待合并）；合并后再把本节焦点收紧为仅 STORY-011。
 
 ---
 
@@ -279,28 +279,30 @@
 
 ### STORY-010 — Page Object: 患者报告详情页
 
-**状态：** `[~]`
+**状态：** `[x]`
 
 **As a** developer automating patient report replies,
 **I want** the report detail page logic encapsulated in a Page Object,
 **So that** extracting report data and filling the reply field is a clean, testable operation.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/pages/PatientReportDetailPage.ts` 导出 `PatientReportDetailPage` 类
-- [ ] `open(reportId: string)` 方法：导航到指定报告详情页
-- [ ] `extractData()` 方法：提取报告数据，返回完整的 `PatientReport` 对象（含 `reportContent`、`replyContent`）
-- [ ] 暴露 `replySelector` 和 `saveButtonSelector` 属性（供 `dryRun.ts` 的 `safeClick/safeFill` 使用）
-- [ ] 数据提取失败（元素不存在）时抛出描述性 `Error`
-- [ ] 所有选择器定义为类的 `private readonly` 属性
-- [ ] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
+- [x] `src/automation/pages/PatientReportDetailPage.ts` 导出 `PatientReportDetailPage` 类
+- [x] `open(reportId: string)` 方法：导航到指定报告详情页
+- [x] `extractData()` 方法：提取报告数据，返回完整的 `PatientReport` 对象（含 `reportContent`、`replyContent`）
+- [x] 暴露 `replySelector` 和 `saveButtonSelector` 属性（供 `dryRun.ts` 的 `safeClick/safeFill` 使用）
+- [x] 数据提取失败（元素不存在）时抛出描述性 `Error`
+- [x] 所有选择器定义为类的 `private readonly` 属性（`replySelector` / `saveButtonSelector` 为对外公开的 `readonly` 字段，供 Dry-Run 写入路径使用）
+- [x] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
 
 **Depends on:** STORY-007
+
+**交付记录：** **PR #12**（分支 `feature/story-010-patient-report-detail-page` → `main`）：`PatientReportDetailPage.ts`（`open` 使用 `thirdPartyUrl` + `patient-report-detail/{reportId}` placeholder 路径）；`replySelector` / `saveButtonSelector` 为 public `readonly`；其余选择器为 `private readonly`；代码已审核通过；合并后本节可简化为「已合入」；选择器待 STORY-012 替换。
 
 ---
 
 ### STORY-011 — Page Object: Web 邮件撰写页
 
-**状态：** `[ ]`
+**状态：** `[~]`
 
 **As a** developer automating email sending,
 **I want** the webmail compose page logic encapsulated in a Page Object,
@@ -525,8 +527,8 @@ STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
 STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation/browser.ts`）
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
-    ├──→ STORY-010 [~]（POM: 报告详情页；当前进行中）
-    └──→ STORY-011 (POM: 邮件撰写页)
+    ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；**PR #12** → `main` 待合并）
+    └──→ STORY-011 [~]（POM: 邮件撰写页；当前 Agent 焦点）
          ↓
     STORY-012a (Agent: 交互式选择器采集工具)
          ↓
@@ -582,8 +584,8 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | PR #9 已合并；`browser.ts`；依赖 006 |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
-| STORY-010 | POM: 患者报告详情页 | Agent | `[~] 进行中` | 栈顶；依赖 007，选择器待采集后补全 |
-| STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
+| STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | **PR #12** → `main` 待合并；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
+| STORY-011 | POM: Web 邮件撰写页 | Agent | `[~] 进行中` | 栈顶；依赖 004+007；选择器待 STORY-012 采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
 | STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
 | STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
@@ -591,7 +593,7 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 9 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 10 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
