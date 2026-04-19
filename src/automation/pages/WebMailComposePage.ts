@@ -16,6 +16,9 @@ export interface WebMailComposeEmailInput {
  * Selectors are placeholders until STORY-012 captures real ones.
  */
 export class WebMailComposePage {
+  /** Window label for supervised UI and multi-window logs (STORY-004b / STORY-013). */
+  static readonly windowLabel = 'Webmail';
+
   private readonly page: Page;
 
   private readonly config: TaskConfig;
@@ -34,8 +37,6 @@ export class WebMailComposePage {
 
   /** Placeholder: replace after selector capture (STORY-012). */
   private readonly sendButtonSelector = '[data-clinichub="webmail-compose-send"]';
-
-  private static readonly windowLabel = 'Webmail';
 
   constructor(page: Page, config: TaskConfig) {
     this.page = page;

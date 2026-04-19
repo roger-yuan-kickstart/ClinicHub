@@ -10,7 +10,7 @@ const MANUAL_LOGIN_POLL_MS = 2_000;
 /** Short probe so each poll completes quickly while the user is not yet logged in. */
 const MANUAL_LOGIN_PROBE_MS = 1_000;
 const IS_LOGGED_IN_PROBE_MS = 5_000;
-/** Reminder log if login is still pending (UX; not configurable). */
+/** Remind the operator every 5 minutes while login is still pending; not user-configurable (UX constant). */
 const MANUAL_LOGIN_REMINDER_MS = 300_000;
 
 /**
