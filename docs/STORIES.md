@@ -334,7 +334,7 @@
 **Acceptance Criteria:**
 - [x] `src/tools/selectorCapture.ts` 是工具入口，通过 `pnpm selector-capture` 启动
 - [x] 启动时加载 `SESSION_STATE_PATH` 中已保存的登录 Session（跳过登录步骤）；若文件不存在则提示用户先保存 Session
-- [x] 工具支持同时管理多个 Page，通过 CLI 命令 `window <label>` 切换当前操作窗口（例：`window ThirdParty`、`window Webmail`）
+- [x] 工具支持同时管理多个 Page：通过 `window <label>` 切换到已注册标签；通过 `window new <label>` 打开空白页并注册新标签（例：`window ThirdParty`、`window new Webmail`）
 - [x] 在浏览器页面上注入高亮脚本：鼠标悬停时用蓝色边框标注当前元素，点击时捕获该元素
 - [x] 每次捕获后，CLI 打印以下信息供确认：
   - 当前窗口标签（`windowLabel`）
@@ -350,12 +350,12 @@
   - `done` — 结束当前分段，打印已采集摘要
   - `quit` — 退出工具
 - [x] 所有确认的条目追加写入 `./recordings/SELECTORS.md`，格式为结构化 Markdown 表格（含 `stepName`、`windowLabel`、`actionType`、`selector`、`note` 列）
-- [x] **多窗口支持**：`window <label>` 命令打开或切换到对应 Page；工具自动监听 `context.on('page')` 事件检测新窗口
+- [x] **多窗口支持**：`window <label>` 仅切换到已有标签；新建空白页用 `window new <label>`；未知标签会列出已有标签并提示；工具自动监听 `context.on('page')` 事件检测新窗口
 - [x] `package.json` 中新增 script：`"selector-capture": "ts-node src/tools/selectorCapture.ts"`
 
 **Depends on:** STORY-007, STORY-008（需要 `createBrowserContext` 的 `storageState` 支持与 Login POM）
 
-**交付记录：** **PR #14**，分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts`（`createBrowserContext` + `config.sessionStatePath`）；`context.addInitScript` 悬停高亮 + 点击经 `context.exposeFunction` 回传；`window` / `context.on('page')` 多窗口；`pnpm selector-capture`。
+**交付记录：** **PR #14**，分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts` + `selectorCapture.inject.js`（页内脚本与启发式说明）；`createBrowserContext` + `config.sessionStatePath`；`loadSessionStateOrExplain` 统一退出码；`window` / `window new` / `context.on('page')`；写入失败 try/catch；`pnpm selector-capture`。
 
 ---
 
@@ -391,7 +391,7 @@
 
 **Session 3 — 多窗口：从第三方系统复制到 Webmail：**
 - [ ] 在 `ThirdParty` 窗口采集报告内容的 `read` 选择器
-- [ ] 执行 `window Webmail` 切换到 Webmail 窗口，采集邮件正文框的 `fill` 选择器
+- [ ] 切换到 Webmail 窗口（若尚未打开：`window new Webmail` 再导航；若已由弹窗注册则 `window Webmail` 或 `window popup-*`），采集邮件正文框的 `fill` 选择器
 - [ ] 采集：收件人字段、主题字段、发送按钮
 - [ ] 全部条目 `ok` 确认，写入 `SELECTORS.md`
 
