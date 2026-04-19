@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点（进行中）：** **STORY-011** — Web 邮件撰写页 POM。STORY-010 详情页 POM 已在分支 `feature/story-010-patient-report-detail-page` 交付（`PatientReportDetailPage.ts`）；合并后可将焦点标为下一 Story。
+> **当前 Agent 焦点（进行中）：** **STORY-011** — Web 邮件撰写页 POM（栈顶）。**STORY-010**（`PatientReportDetailPage.ts`）已从 `feature/story-010-patient-report-detail-page` **开 PR 合并至 `main`**（代码已审核通过）；PR 合并后再把本节焦点收紧为仅 STORY-011。
 
 ---
 
@@ -296,13 +296,13 @@
 
 **Depends on:** STORY-007
 
-**交付记录：** 分支 `feature/story-010-patient-report-detail-page`：`PatientReportDetailPage.ts`（`open` 使用 `thirdPartyUrl` + `patient-report-detail/{reportId}` placeholder 路径）；`replySelector` / `saveButtonSelector` 为 public `readonly`；其余选择器为 `private readonly`；选择器待 STORY-012 替换。
+**交付记录：** 分支 `feature/story-010-patient-report-detail-page`：`PatientReportDetailPage.ts`（`open` 使用 `thirdPartyUrl` + `patient-report-detail/{reportId}` placeholder 路径）；`replySelector` / `saveButtonSelector` 为 public `readonly`；其余选择器为 `private readonly`；代码已审核通过，**PR 合并至 `main` 后在此填写 PR 编号**；选择器待 STORY-012 替换。
 
 ---
 
 ### STORY-011 — Page Object: Web 邮件撰写页
 
-**状态：** `[ ]`
+**状态：** `[~]`
 
 **As a** developer automating email sending,
 **I want** the webmail compose page logic encapsulated in a Page Object,
@@ -527,8 +527,8 @@ STORY-006 ✅（类型定义；PR #8 已合并；`src/types/index.ts`）
 STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation/browser.ts`）
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
-    ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`）
-    └──→ STORY-011 (POM: 邮件撰写页)
+    ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；PR → `main` 待合并）
+    └──→ STORY-011 [~]（POM: 邮件撰写页；当前 Agent 焦点）
          ↓
     STORY-012a (Agent: 交互式选择器采集工具)
          ↓
@@ -584,8 +584,8 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-007 | Playwright 浏览器初始化 | Agent | `[x] 已完成` | PR #9 已合并；`browser.ts`；依赖 006 |
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
-| STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | 分支 `feature/story-010-patient-report-detail-page`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
-| STORY-011 | POM: Web 邮件撰写页 | Agent | `[ ] 待开始` | 依赖 004+007，选择器待采集后补全 |
+| STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | `PatientReportDetailPage.ts`；PR 合并至 `main` 待定（分支 `feature/story-010-patient-report-detail-page`）；选择器待 STORY-012 |
+| STORY-011 | POM: Web 邮件撰写页 | Agent | `[~] 进行中` | 栈顶；依赖 004+007；选择器待 STORY-012 采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
 | STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
 | STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
