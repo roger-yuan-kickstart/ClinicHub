@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点（进行中）：** **STORY-012a** — 交互式选择器采集工具（栈顶）。**STORY-011** 已在分支 `feature/story-011-webmail-compose-page` 交付 `WebMailComposePage.ts`（待 PR 合入 `main`）。**STORY-010** 已于 **PR #12** 合入 `main`（`PatientReportDetailPage.ts`）。
+> **当前 Agent 焦点（进行中）：** **STORY-012**（人类，`[~]`）— 分段选择器采集（Session 0~3）；**STORY-012a** 工具随 **PR #14** 合入 `main` 后即可使用 `pnpm selector-capture`（PR 已审核，待合并）。下一 Agent 实现 Story：**STORY-013**（依赖 STORY-012 产出真实选择器）。**STORY-011** 已在分支 `feature/story-011-webmail-compose-page` 交付 `WebMailComposePage.ts`（待 PR 合入 `main`）。**STORY-010** 已于 **PR #12** 合入 `main`（`PatientReportDetailPage.ts`）。
 
 ---
 
@@ -325,23 +325,23 @@
 
 ### STORY-012a — 交互式选择器采集工具
 
-**状态：** `[ ]`
+**状态：** `[x]`
 
 **As a** developer who needs to identify real selectors from the third-party system,
 **I want** an interactive CLI tool that lets me hover over elements and capture their selectors one by one with my confirmation,
 **So that** I can build SELECTORS.md incrementally across multiple sessions, handling multi-window flows and branching UI states cleanly.
 
 **Acceptance Criteria:**
-- [ ] `src/tools/selectorCapture.ts` 是工具入口，通过 `pnpm selector-capture` 启动
-- [ ] 启动时加载 `SESSION_STATE_PATH` 中已保存的登录 Session（跳过登录步骤）；若文件不存在则提示用户先保存 Session
-- [ ] 工具支持同时管理多个 Page，通过 CLI 命令 `window <label>` 切换当前操作窗口（例：`window ThirdParty`、`window Webmail`）
-- [ ] 在浏览器页面上注入高亮脚本：鼠标悬停时用蓝色边框标注当前元素，点击时捕获该元素
-- [ ] 每次捕获后，CLI 打印以下信息供确认：
+- [x] `src/tools/selectorCapture.ts` 是工具入口，通过 `pnpm selector-capture` 启动
+- [x] 启动时加载 `SESSION_STATE_PATH` 中已保存的登录 Session（跳过登录步骤）；若文件不存在则提示用户先保存 Session
+- [x] 工具支持同时管理多个 Page：通过 `window <label>` 切换到已注册标签；通过 `window new <label>` 打开空白页并注册新标签（例：`window ThirdParty`、`window new Webmail`）
+- [x] 在浏览器页面上注入高亮脚本：鼠标悬停时用蓝色边框标注当前元素，点击时捕获该元素
+- [x] 每次捕获后，CLI 打印以下信息供确认：
   - 当前窗口标签（`windowLabel`）
   - 生成的 CSS 选择器（优先级：`id` > `data-*` > `aria-label` > `role+text` > 层级路径）
   - 元素可见文本（前 50 字符）
   - 元素类型（`input`、`button`、`div` 等）
-- [ ] CLI 交互命令：
+- [x] CLI 交互命令：
   - `name <stepName>` — 为下一次捕获命名（例：`name report-content-read`）
   - `type <read|click|fill>` — 标记动作类型
   - `ok` — 确认并写入 SELECTORS.md
@@ -349,17 +349,19 @@
   - `note <text>` — 为当前条目添加备注（用于描述分支场景）
   - `done` — 结束当前分段，打印已采集摘要
   - `quit` — 退出工具
-- [ ] 所有确认的条目追加写入 `./recordings/SELECTORS.md`，格式为结构化 Markdown 表格（含 `stepName`、`windowLabel`、`actionType`、`selector`、`note` 列）
-- [ ] **多窗口支持**：`window <label>` 命令打开或切换到对应 Page；工具自动监听 `context.on('page')` 事件检测新窗口
-- [ ] `package.json` 中新增 script：`"selector-capture": "ts-node src/tools/selectorCapture.ts"`
+- [x] 所有确认的条目追加写入 `./recordings/SELECTORS.md`，格式为结构化 Markdown 表格（含 `stepName`、`windowLabel`、`actionType`、`selector`、`note` 列）
+- [x] **多窗口支持**：`window <label>` 仅切换到已有标签；新建空白页用 `window new <label>`；未知标签会列出已有标签并提示；工具自动监听 `context.on('page')` 事件检测新窗口
+- [x] `package.json` 中新增 script：`"selector-capture": "ts-node src/tools/selectorCapture.ts"`
 
 **Depends on:** STORY-007, STORY-008（需要 `createBrowserContext` 的 `storageState` 支持与 Login POM）
+
+**交付记录：** **PR #14**（审核完成，待合入 `main`），分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts` + `selectorCapture.inject.js`（页内脚本与启发式说明）；`createBrowserContext` + `config.sessionStatePath`；`loadSessionStateOrExplain` 统一退出码；`window` / `window new` / `context.on('page')`；写入失败 try/catch；`pnpm selector-capture`。
 
 ---
 
 ### STORY-012 — 选择器采集会话（分段录制）
 
-**状态：** `[ ]`
+**状态：** `[~]`
 
 > ⚠️ **这个 Story 由人类完成，不是 Agent 任务。**
 >
@@ -389,7 +391,7 @@
 
 **Session 3 — 多窗口：从第三方系统复制到 Webmail：**
 - [ ] 在 `ThirdParty` 窗口采集报告内容的 `read` 选择器
-- [ ] 执行 `window Webmail` 切换到 Webmail 窗口，采集邮件正文框的 `fill` 选择器
+- [ ] 切换到 Webmail 窗口（若尚未打开：`window new Webmail` 再导航；若已由弹窗注册则 `window Webmail` 或 `window popup-*`），采集邮件正文框的 `fill` 选择器
 - [ ] 采集：收件人字段、主题字段、发送按钮
 - [ ] 全部条目 `ok` 确认，写入 `SELECTORS.md`
 
@@ -532,9 +534,9 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
     ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；PR #12 已合并至 `main`）
     └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；分支 `feature/story-011-webmail-compose-page`，待 PR）
          ↓
-    STORY-012a (Agent: 交互式选择器采集工具)
+    STORY-012a ✅（交互式选择器采集工具；PR #14 → `main`）
          ↓
-    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3）]
+    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3），`[~]` 进行中]
          ↓
     STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI)
          ↓
@@ -588,14 +590,14 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | PR #12 已合并至 `main`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | `WebMailComposePage.ts`；分支待 PR；选择器待 STORY-012 采集后补全 |
-| STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
-| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
+| STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | **PR #14**（待合入 `main`）：`selectorCapture.ts` + `pnpm selector-capture` |
+| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[~] 进行中` | Session 0~3；依赖 012a 工具 + 008~011 骨架 |
 | STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
 | STORY-014 | 主入口 Runner | Agent | `[ ] 待开始` | 依赖 013 |
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 11 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 12 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
