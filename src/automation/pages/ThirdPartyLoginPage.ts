@@ -5,7 +5,10 @@ import type { BrowserContext, Page } from 'playwright';
 import { logger } from '../../logger';
 import type { TaskConfig } from '../../types';
 
+/** Interval between manual-login polls (story: every 2 seconds). */
 const MANUAL_LOGIN_POLL_MS = 2_000;
+/** Short probe so each poll completes quickly while the user is not yet logged in. */
+const MANUAL_LOGIN_PROBE_MS = 1_000;
 const IS_LOGGED_IN_PROBE_MS = 5_000;
 
 /**
@@ -72,7 +75,7 @@ export class ThirdPartyLoginPage {
     logger.info('Waiting for manual login (polling every 2 seconds)...');
 
     for (;;) {
-      if (await this.isLoggedIn()) {
+      if (await this.isLoggedIn(MANUAL_LOGIN_PROBE_MS)) {
         return;
       }
       await new Promise<void>((r) => {
@@ -81,11 +84,11 @@ export class ThirdPartyLoginPage {
     }
   }
 
-  async isLoggedIn(): Promise<boolean> {
+  async isLoggedIn(probeTimeoutMs: number = IS_LOGGED_IN_PROBE_MS): Promise<boolean> {
     try {
       await this.page.locator(this.postLoginRootSelector).first().waitFor({
         state: 'visible',
-        timeout: IS_LOGGED_IN_PROBE_MS,
+        timeout: probeTimeoutMs,
       });
       return true;
     } catch {
