@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点：** **STORY-002a** 已交付（`pnpm setup-session`、凭据字段移除）；人类可继续 **STORY-012** Session 0（`pnpm setup-session`）。下一 Agent 可开工 **STORY-013**（主工作流编排；编排中的登录步骤须对齐 002a：`waitForManualLogin` / `pnpm setup-session`，勿再引用已删除的凭据 env）。**STORY-012a** 已于 **PR #14** 合入 `main`。**STORY-010** 已于 **PR #12** 合入 `main`。
+> **当前进度：** 人类 **STORY-012** 分段选择器采集中（`[~]` 进行中；Session 0 用 `pnpm setup-session`）。**STORY-002a** 代码与文档随 **PR #15** 合入 `main`（凭据移除 + `pnpm setup-session`）。**STORY-013**（主工作流）硬依赖 **STORY-012** 完成，待 012 收尾后再由 Agent 开工。编排登录须对齐 002a：`waitForManualLogin` / 已保存 session，勿引用已删除的凭据 env。**STORY-012a** PR #14、**STORY-010** PR #12 已在 `main`。
 
 ---
 
@@ -402,6 +402,8 @@
 
 > **注意：** STORY-011 的 AC 中「收件人沙箱强制保护」条目由本 Story 正式废除，`WebMailComposePage.ts` 的实现以本 Story 交付为准。
 
+**交付记录：** **PR #15** 已合并至 `main`（分支 `feature/story-002a-setup-session`）。
+
 ---
 
 ### STORY-012 — 选择器采集会话（分段录制）
@@ -578,15 +580,15 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
     ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；PR #12 已合并至 `main`）
-    └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；分支 `feature/story-011-webmail-compose-page`，待 PR）
+    └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；PR #13 → `main`，后由 002a/PR #15 修订）
          ↓
     STORY-012a ✅（交互式选择器采集工具；PR #14 → `main`）
          ↓
-    STORY-002a ✅（移除凭据配置 & `pnpm setup-session`；依赖 002+008+011）
+    STORY-002a ✅（移除凭据配置 & `pnpm setup-session`；PR #15 → `main`；依赖 002+008+011）
          ↓
-    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3），`[~]` 进行中]
+    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3），`[~]` 进行中 — **阻塞 STORY-013**]
          ↓
-    STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI)
+    STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI；**开工条件: 012 完成**)
          ↓
     STORY-014 (主入口 Runner)
          ↓
@@ -637,11 +639,11 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | PR #12 已合并至 `main`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
-| STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | `WebMailComposePage.ts`；分支待 PR；选择器待 STORY-012 采集后补全 |
+| STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | PR #13 → `main`；002a/PR #15 修订 compose；选择器待 STORY-012 采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | **PR #14** 已合并至 `main`：`selectorCapture.ts` + `pnpm selector-capture` |
-| STORY-002a | 移除凭据配置 & setup-session 工具 | Agent | `[x] 已完成` | `setupSession.ts` + `pnpm setup-session`；`ThirdPartyLoginPage.waitForManualLogin`；`WebMailComposePage` 无凭据导航 |
-| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[~] 进行中` | Session 0 改用 `pnpm setup-session`；依赖 002a + 012a + 008~011 |
-| STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
+| STORY-002a | 移除凭据配置 & setup-session 工具 | Agent | `[x] 已完成` | **PR #15** → `main`：`setupSession.ts`、`waitForManualLogin`、compose 无凭据 |
+| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[~] 进行中` | 阻塞 STORY-013；Session 0 用 `pnpm setup-session`；依赖 002a + 012a + 008~011 |
+| STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 依赖 **STORY-012** 完成；Session 恢复 & Supervised UI |
 | STORY-014 | 主入口 Runner | Agent | `[ ] 待开始` | 依赖 013 |
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
@@ -650,6 +652,6 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 
 ---
 
-*最后更新：2026-04-18*
+*最后更新：2026-04-19*
 *文档维护：Top Agent（架构决策 & Story 设计）*
 *执行：Implementation Agent（Story 级别逐一完成）*
