@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点（进行中）：** **STORY-011** — Web 邮件撰写页 POM（栈顶）。**STORY-010** 已于 **PR #12** 合入 `main`（`PatientReportDetailPage.ts`）。
+> **当前 Agent 焦点（进行中）：** **STORY-012a** — 交互式选择器采集工具（栈顶）。**STORY-011** 已在分支 `feature/story-011-webmail-compose-page` 交付 `WebMailComposePage.ts`（待 PR 合入 `main`）。**STORY-010** 已于 **PR #12** 合入 `main`（`PatientReportDetailPage.ts`）。
 
 ---
 
@@ -302,22 +302,24 @@
 
 ### STORY-011 — Page Object: Web 邮件撰写页
 
-**状态：** `[~]`
+**状态：** `[x]`
 
 **As a** developer automating email sending,
 **I want** the webmail compose page logic encapsulated in a Page Object,
 **So that** sending an email is a single method call, and the recipient sandbox protection is enforced at the Page Object level.
 
 **Acceptance Criteria:**
-- [ ] `src/automation/pages/WebMailComposePage.ts` 导出 `WebMailComposePage` 类
-- [ ] `navigate()` 方法：导航到 Web 邮件平台并登录（如需要）
-- [ ] `composeEmail({ to, subject, body })` 方法：填写收件人、主题、正文
-- [ ] **收件人沙箱强制保护**：当 `DRY_RUN=true` 或 `TEST_EMAIL_RECIPIENT` 不为空时，实际填写的收件人必须替换为 `TEST_EMAIL_RECIPIENT`，日志明确打印 "⚠️ 收件人已替换为测试邮箱: {TEST_EMAIL_RECIPIENT}"
-- [ ] `sendEmail()` 方法：点击发送按钮（通过 `safeClick` 执行，受 Dry-Run 保护）
-- [ ] 所有选择器定义为类的 `private readonly` 属性
-- [ ] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
+- [x] `src/automation/pages/WebMailComposePage.ts` 导出 `WebMailComposePage` 类
+- [x] `navigate()` 方法：导航到 Web 邮件平台并登录（如需要）
+- [x] `composeEmail({ to, subject, body })` 方法：填写收件人、主题、正文
+- [x] **收件人沙箱强制保护**：当 `DRY_RUN=true` 或 `TEST_EMAIL_RECIPIENT` 不为空时，实际填写的收件人必须替换为 `TEST_EMAIL_RECIPIENT`，日志明确打印 "⚠️ 收件人已替换为测试邮箱: {TEST_EMAIL_RECIPIENT}"
+- [x] `sendEmail()` 方法：点击发送按钮（通过 `safeClick` 执行，受 Dry-Run 保护）
+- [x] 所有选择器定义为类的 `private readonly` 属性
+- [x] **注意：此 Story 中选择器是 placeholder，需在 STORY-012（录制）完成后用真实选择器替换**
 
 **Depends on:** STORY-004, STORY-007
+
+**交付记录：** 分支 `feature/story-011-webmail-compose-page`：`WebMailComposePage.ts`（`navigate` / `loginFresh` 与 `ThirdPartyLoginPage` 对齐；`composeEmail` 经 `safeFill`；`sendEmail` 经 `safeClick`）；沙箱替换日志在代码中为英文 + `\u26a0\ufe0f`（遵守仓库 ESLint 禁止源码中文）；选择器待 STORY-012 替换。
 
 ---
 
@@ -528,7 +530,7 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
     ├──→ STORY-008 ✅（POM: 登录页 + browser `storageState`；`ThirdPartyLoginPage.ts`）
     ├──→ STORY-009 ✅（POM: 报告列表页；`PatientReportListPage.ts`）
     ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；PR #12 已合并至 `main`）
-    └──→ STORY-011 [~]（POM: 邮件撰写页；当前 Agent 焦点）
+    └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；分支 `feature/story-011-webmail-compose-page`，待 PR）
          ↓
     STORY-012a (Agent: 交互式选择器采集工具)
          ↓
@@ -585,7 +587,7 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-008 | POM: 第三方系统登录页 | Agent | `[x] 已完成` | `ThirdPartyLoginPage.ts` + `browser.ts` storageState；Session 恢复契约文档；依赖 007 |
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | PR #12 已合并至 `main`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
-| STORY-011 | POM: Web 邮件撰写页 | Agent | `[~] 进行中` | 栈顶；依赖 004+007；选择器待 STORY-012 采集后补全 |
+| STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | `WebMailComposePage.ts`；分支待 PR；选择器待 STORY-012 采集后补全 |
 | STORY-012a | 交互式选择器采集工具 | Agent | `[ ] 待开始` | CLI 工具，支持多窗口，写入 SELECTORS.md；依赖 007+008 |
 | STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
 | STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
@@ -593,7 +595,7 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
 | STORY-016 | ⚠️ 真实模式首次发送验证 | **人类** | `[ ] 待开始` | Phase 1 最终里程碑 |
 
-**进度：** 10 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
+**进度：** 11 / 18 完成 &nbsp;|&nbsp; 🤖 Agent 任务：14 个 &nbsp;|&nbsp; 👤 人类任务：4 个
 
 ---
 
