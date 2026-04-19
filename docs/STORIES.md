@@ -31,7 +31,7 @@
 >
 > **语言规范：所有代码（变量名、注释、日志、错误消息、UI 文案）必须使用英文，禁止在代码文件中出现中文字符。文档（`docs/`）除外。**
 >
-> **当前 Agent 焦点（进行中）：** **STORY-012**（人类）— 分段选择器采集会话；工具入口见 **STORY-012a**（`pnpm selector-capture`）。**STORY-011** 已在分支 `feature/story-011-webmail-compose-page` 交付 `WebMailComposePage.ts`（待 PR 合入 `main`）。**STORY-010** 已于 **PR #12** 合入 `main`（`PatientReportDetailPage.ts`）。
+> **当前 Agent 焦点（进行中）：** **STORY-012**（人类，`[~]`）— 分段选择器采集（Session 0~3）；**STORY-012a** 工具随 **PR #14** 合入 `main` 后即可使用 `pnpm selector-capture`（PR 已审核，待合并）。下一 Agent 实现 Story：**STORY-013**（依赖 STORY-012 产出真实选择器）。**STORY-011** 已在分支 `feature/story-011-webmail-compose-page` 交付 `WebMailComposePage.ts`（待 PR 合入 `main`）。**STORY-010** 已于 **PR #12** 合入 `main`（`PatientReportDetailPage.ts`）。
 
 ---
 
@@ -355,13 +355,13 @@
 
 **Depends on:** STORY-007, STORY-008（需要 `createBrowserContext` 的 `storageState` 支持与 Login POM）
 
-**交付记录：** **PR #14**，分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts` + `selectorCapture.inject.js`（页内脚本与启发式说明）；`createBrowserContext` + `config.sessionStatePath`；`loadSessionStateOrExplain` 统一退出码；`window` / `window new` / `context.on('page')`；写入失败 try/catch；`pnpm selector-capture`。
+**交付记录：** **PR #14**（审核完成，待合入 `main`），分支 `feature/story-012a-selector-capture`：`src/tools/selectorCapture.ts` + `selectorCapture.inject.js`（页内脚本与启发式说明）；`createBrowserContext` + `config.sessionStatePath`；`loadSessionStateOrExplain` 统一退出码；`window` / `window new` / `context.on('page')`；写入失败 try/catch；`pnpm selector-capture`。
 
 ---
 
 ### STORY-012 — 选择器采集会话（分段录制）
 
-**状态：** `[ ]`
+**状态：** `[~]`
 
 > ⚠️ **这个 Story 由人类完成，不是 Agent 任务。**
 >
@@ -534,9 +534,9 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
     ├──→ STORY-010 ✅（POM: 报告详情页；`PatientReportDetailPage.ts`；PR #12 已合并至 `main`）
     └──→ STORY-011 ✅（POM: 邮件撰写页；`WebMailComposePage.ts`；分支 `feature/story-011-webmail-compose-page`，待 PR）
          ↓
-    STORY-012a (Agent: 交互式选择器采集工具)
+    STORY-012a ✅（交互式选择器采集工具；PR #14 → `main`）
          ↓
-    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3）]
+    STORY-012 ⚠️ [人类操作: 分段选择器采集（Session 0~3），`[~]` 进行中]
          ↓
     STORY-013 (主工作流编排，含 Session 恢复 & Supervised UI)
          ↓
@@ -590,8 +590,8 @@ STORY-007 ✅（浏览器初始化；PR #9 已合并至 `main`；`src/automation
 | STORY-009 | POM: 患者报告列表页 | Agent | `[x] 已完成` | PR #11 已合并；`PatientReportListPage.ts` + `pageUtils.ts`；选择器待 STORY-012 |
 | STORY-010 | POM: 患者报告详情页 | Agent | `[x] 已完成` | PR #12 已合并至 `main`；`PatientReportDetailPage.ts`；选择器待 STORY-012 |
 | STORY-011 | POM: Web 邮件撰写页 | Agent | `[x] 已完成` | `WebMailComposePage.ts`；分支待 PR；选择器待 STORY-012 采集后补全 |
-| STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | **PR #14**：`selectorCapture.ts` + `pnpm selector-capture` |
-| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[ ] 待开始` | Session 0~3，依赖 012a + 008~011 骨架 |
+| STORY-012a | 交互式选择器采集工具 | Agent | `[x] 已完成` | **PR #14**（待合入 `main`）：`selectorCapture.ts` + `pnpm selector-capture` |
+| STORY-012 | ⚠️ 分段选择器采集会话 | **人类** | `[~] 进行中` | Session 0~3；依赖 012a 工具 + 008~011 骨架 |
 | STORY-013 | Feature 1 主工作流编排 | Agent | `[ ] 待开始` | 含 Session 恢复 & Supervised UI；依赖 012 |
 | STORY-014 | 主入口 Runner | Agent | `[ ] 待开始` | 依赖 013 |
 | STORY-015 | ⚠️ Dry-Run 端到端验证 | **人类** | `[ ] 待开始` | 需亲自操作并人工目视核查截图 |
